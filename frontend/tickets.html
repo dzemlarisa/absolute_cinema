@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Оформление билета</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+</head>
+<body>
+    <header class="main-header">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="index.html">Absolute cinema</a>
+            </div>
+            <nav class="main-nav">
+                <ul class="nav-list">
+                    <li><a href="index.html#cinemas-section" class="nav-link">Кинотеатры</a></li>
+                    <li><a href="index.html#movies-section" class="nav-link">Все фильмы</a></li>
+                    <li><a href="index.html#buy-ticket-section" class="nav-link">Купить билет</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn-auth" id="authModalBtn">Вход</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="buy-ticket-hero">
+            <div class="container">
+                <h1>Оформление билетов</h1>
+                <p>Выберите количество билетов</p>
+            </div>
+        </div>
+
+        <div class="ticket-container">
+            <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Назад к выбору сеанса</a>
+
+            <div class="ticket-grid">
+                <div class="session-info-card">
+                    <div class="session-header">
+                        <h2 id="movieTitle">Загрузка...</h2>
+                        <div class="session-meta">
+                            <span><span id="movieGenre"></span></span>
+                            <span><span id="movieYear"></span></span>
+                        </div>
+                    </div>
+                    <div class="session-detail-item">
+                        <span class="label">Кинотеатр</span>
+                        <span class="value" id="cinemaName">—</span>
+                    </div>
+                    <div class="session-detail-item">
+                        <span class="label">Начало сеанса</span>
+                        <span class="value" id="sessionTime">—</span>
+                    </div>
+                    <div class="session-detail-item">
+                        <span class="label">Зал</span>
+                        <span class="value" id="hallName">—</span>
+                    </div>
+                    <div class="session-detail-item">
+                        <span class="label">Свободных мест</span>
+                        <span class="value seats-available" id="availableSeats">—</span>
+                    </div>
+                    <div class="session-detail-item">
+                        <span class="label">Цена за билет</span>
+                        <span class="value price-value" id="ticketPrice">—</span>
+                    </div>
+                </div>
+
+                <div class="purchase-card">
+                    <h3>Покупка билетов</h3>
+                    
+                    <div class="ticket-count-section">
+                        <div class="ticket-count-control">
+                            <label>Количество билетов:</label>
+                            <input type="number" id="ticketCount" min="1" max="50" value="1">
+                        </div>
+
+                        <div class="total-price-block">
+                            <div class="total-label">ИТОГО К ОПЛАТЕ</div>
+                            <div class="total-amount" id="totalPrice">0 ₽</div>
+                        </div>
+
+                        <button class="btn-buy" id="buyBtn">Купить билеты</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container footer-container">
+            <div class="footer-col">
+                <h4>Absolute cinema</h4>
+                <p>Самый удобный сервис покупки билетов.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Контакты</h4>
+                <p><i class="fas fa-phone-alt"></i> +7 (999) 888-77-66</p>
+            </div>
+        </div>
+    </footer>
+
+
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-header"><h2>Вход в аккаунт</h2></div>
+            <div class="modal-body">
+                <form id="authForm">
+                    <div class="form-group"><label>Телефон</label><input type="text" required id="loginPhone"></div>
+                    <div class="form-group"><label>Пароль</label><input type="password" required id="loginPassword"></div>
+                    <button type="submit" class="btn-auth-submit">Войти</button>
+                    <p class="auth-switch">Нет аккаунта? <a href="#" id="showRegisterLink">Зарегистрироваться</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-header"><h2>Регистрация</h2></div>
+            <div class="modal-body">
+                <form id="registerForm">
+                    <div class="form-group"><label>Имя</label><input type="text" required id="regName"></div>
+                    <div class="form-group"><label>Номер телефона</label><input type="tel" required id="regPhone"></div>
+                    <div class="form-group"><label>Пароль</label><input type="password" required id="regPassword"></div>
+                    <button type="submit" class="btn-auth-submit">Зарегистрироваться</button>
+                    <p class="auth-switch">Уже есть аккаунт? <a href="#" id="showLoginLink">Войти</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const cinema = decodeURIComponent(urlParams.get('cinema') || 'Кинотеатр 1');
+        const movie = decodeURIComponent(urlParams.get('movie') || 'Фильм');
+        const time = decodeURIComponent(urlParams.get('time') || '19:00');
+        const hall = decodeURIComponent(urlParams.get('hall') || 'Зал 1');
+        const availableSeatsCount = parseInt(urlParams.get('seats') || '50');
+        const price = parseInt(urlParams.get('price') || '450');
+
+        const moviesData = {
+            'Интерстеллар': { genre: 'Фантастика', year: 2014 },
+            'Аватар: Путь воды': { genre: 'Фантастика', year: 2022 }
+        };
+
+        const movieInfo = moviesData[movie] || { genre: 'Жанр', year: '2026' };
+
+        document.getElementById('movieTitle').textContent = movie;
+        document.getElementById('movieGenre').textContent = movieInfo.genre;
+        document.getElementById('movieYear').textContent = movieInfo.year;
+        document.getElementById('cinemaName').textContent = cinema;
+        document.getElementById('sessionTime').textContent = time;
+        document.getElementById('hallName').textContent = hall;
+        document.getElementById('availableSeats').textContent = availableSeatsCount + ' мест';
+        document.getElementById('ticketPrice').innerHTML = `${price} ₽`;
+
+        const ticketCountInput = document.getElementById('ticketCount');
+        const totalPriceSpan = document.getElementById('totalPrice');
+
+        ticketCountInput.max = availableSeatsCount;
+        
+        function updateTotalPrice() {
+            let count = parseInt(ticketCountInput.value);
+            if (isNaN(count)) count = 1;
+            if (count < 1) count = 1;
+            if (count > availableSeatsCount) count = availableSeatsCount;
+            ticketCountInput.value = count;
+            
+            const total = count * price;
+            totalPriceSpan.textContent = `${total} ₽`;
+        }
+
+        ticketCountInput.addEventListener('input', updateTotalPrice);
+        updateTotalPrice();
+
+        const buyBtn = document.getElementById('buyBtn');
+        buyBtn.addEventListener('click', () => {
+            const count = parseInt(ticketCountInput.value);
+            
+            if (count <= 0) {
+                alert('Пожалуйста, выберите количество билетов');
+                return;
+            }
+            
+            const total = count * price;
+            
+            alert(`Билеты успешно куплены!\n\nФильм: ${movie}\nКинотеатр: ${cinema}\nВремя: ${time}\nЗал: ${hall}\nКоличество билетов: ${count} шт.\nПриятного просмотра!`);
+            
+            window.location.href = 'index.html';
+        });
+
+        // МОДАЛЬНЫЕ ОКНА
+        const authModal = document.getElementById('authModal');
+        const registerModal = document.getElementById('registerModal');
+        const authBtn = document.getElementById('authModalBtn');
+        
+        function openAuthModal() { authModal.style.display = 'flex'; }
+        function closeAuthModal() { authModal.style.display = 'none'; }
+        function openRegModal() { registerModal.style.display = 'flex'; }
+        function closeRegModal() { registerModal.style.display = 'none'; }
+        
+        if(authBtn) authBtn.addEventListener('click', openAuthModal);
+        
+        document.querySelectorAll('.close-modal').forEach(close => {
+            close.addEventListener('click', () => {
+                closeAuthModal();
+                closeRegModal();
+            });
+        });
+        
+        window.addEventListener('click', (e) => {
+            if(e.target === authModal) closeAuthModal();
+            if(e.target === registerModal) closeRegModal();
+        });
+        
+        const showRegisterLink = document.getElementById('showRegisterLink');
+        const showLoginLink = document.getElementById('showLoginLink');
+        if(showRegisterLink) {
+            showRegisterLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                closeAuthModal();
+                openRegModal();
+            });
+        }
+        if(showLoginLink) {
+            showLoginLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                closeRegModal();
+                openAuthModal();
+            });
+        }
+        
+        const authForm = document.getElementById('authForm');
+        if(authForm) {
+            authForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                alert('Добро пожаловать в Absolute Cinema!');
+                closeAuthModal();
+            });
+        }
+        
+        const registerForm = document.getElementById('registerForm');
+        if(registerForm) {
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                alert('Регистрация прошла успешно!');
+                closeRegModal();
+                openAuthModal();
+            });
+        }
+    </script>
+</body>
+</html>

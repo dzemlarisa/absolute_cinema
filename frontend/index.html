@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Absolute cinema | Билеты в кино</title>
+    <title>Absolute cinema</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -13,7 +13,7 @@
     <header class="main-header">
         <div class="container header-container">
             <div class="logo">
-                <a href="#"><i class="fas fa-film"></i> Absolute cinema</a>
+                <a href="#"></i> Absolute cinema</a>
             </div>
             <nav class="main-nav">
                 <ul class="nav-list">
@@ -23,7 +23,7 @@
                 </ul>
             </nav>
             <div class="auth-buttons">
-                <button class="btn-auth" id="authModalBtn"><i class="fas fa-user-circle"></i>Вход</button>
+                <button class="btn-auth" id="authModalBtn">Вход</button>
             </div>
         </div>
     </header>
@@ -36,31 +36,15 @@
             </div>
         </section>
 
-        <section id="cinemas-section" class="cinemas-list-section">
+        <section id="cinemas-section" class="cinemas">
             <div class="container">
                 <div class="section-header">
                     <h2>Кинотеатры</h2>
                     <span class="section-subtitle">Лучшие залы, удобное расположение</span>
                 </div>
                 <div class="db-placeholder">
-                    <i class="fas fa-database"></i>
-                    <div class="coming-soon"><i class="fas fa-tools"></i> Скоро здесь появятся все кинотеатры города</div>
-                    <small style="display: block; margin-top: 12px;">Интеграция с PostgreSQL — в разработке</small>
+                    <div class="coming-soon"> Скоро здесь появятся все кинотеатры города</div>
                 </div>
-                <div class="cinemas-grid" style="margin-top: 1rem;">
-                    <div class="cinema-card db-demo-card">
-                        <div class="cinema-details">
-                            <h3>Киноцентр <span class="coming-soon" style="margin-left: 12px; font-size: 0.7rem;"><i class="fas fa-database"></i> из БД</span></h3>
-                            <div class="cinema-address"><i class="fas fa-map-marker-alt"></i> ул. Тверская, 7</div>
-                            <div class="cinema-features">
-                                <span><i class="fas fa-film"></i> 8 залов</span>
-                                <span><i class="fas fa-chair"></i> 850 мест</span>
-                            </div>
-                            <button class="btn-cinema-schedule" data-cinema="Киноцентр">Расписание (демо)</button>
-                        </div>
-                    </div>
-                </div>
-                <p style="text-align: center; margin-top: 1rem; color: #f5c51880; font-size: 0.8rem;"><i class="fas fa-spinner fa-pulse"></i> Данные синхронизируются с сервером</p>
             </div>
         </section>
 
@@ -79,12 +63,10 @@
                         <button class="filter-btn" data-filter="боевик">Боевик</button>
                     </div>
                 </div>
-                <div class="db-placeholder" id="moviesDbPlaceholder" style="margin-bottom: 1.5rem;">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <div class="coming-soon"><i class="fas fa-database"></i> Соединение с API фильмов</div>
+                <div class="db-placeholder">
+                    <div class="coming-soon"> Скоро здесь появятся все фильмы</div>
                 </div>
-                <div class="movies-grid extended-grid" id="allMoviesGrid"></div>
-                <p style="text-align: center; margin-top: 1rem; font-size: 0.8rem; opacity: 0.7;"><i class="fas fa-sync-alt"></i> Реальная выборка из базы данных — после подключения бэкенда</p>
+
             </div>
         </section>
 
@@ -94,41 +76,20 @@
                     <h2>Выберите сеанс</h2>
                     <span class="section-subtitle">Кинотеатры, расписание, цены</span>
                 </div>
-                <div class="cinema-filter">
-                    <div class="cinema-buttons" id="cinemaButtonsContainer">
-                        <button class="cinema-btn active-cinema" data-cinema="Киноцентр">Киноцентр</button>
-                        <button class="cinema-btn" data-cinema="Люксор">Люксор</button>
-                        <button class="cinema-btn" data-cinema="Каро 8">Каро 8</button>
-                        <button class="cinema-btn" data-cinema="Формула Кино">Формула Кино</button>
+                <div class="filter-bar">
+                    <div class="filter-buttons" id="cinemaFilterButtons">
+                        <button class="filter-btn active-filter" data-cinema="all">Все кинотеатры</button>
+                        <button class="filter-btn" data-cinema="Кинотеатр 1">Кинотеатр 1</button>
+                        <button class="filter-btn" data-cinema="Кинотеатр 2">Кинотеатр 2</button>
+                        <button class="filter-btn" data-cinema="Кинотеатр 3">Кинотеатр 3</button>
+                        <button class="filter-btn" data-cinema="Кинотеатр 4">Кинотеатр 4</button>
                     </div>
                 </div>
                 <div id="showtimesContainer">
                     <!-- динамические сеансы -->
                 </div>
-                <div class="db-placeholder" style="margin-top: 2rem; background: transparent; border: none;">
-                    <small><i class="fas fa-exchange-alt"></i> Расписание сеансов в реальном времени из базы данных кинотеатров</small>
-                </div>
-            </div>
-        </section>
-
-        <section class="features">
-            <div class="container">
-                <div class="features-grid">
-                    <div class="feature-item">
-                        <i class="fas fa-ticket-alt"></i>
-                        <h3>Без комиссии</h3>
-                        <p>Цена билета как в кассе кинотеатра</p>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-headset"></i>
-                        <h3>Поддержка 24/7</h3>
-                        <p>Поможем с любым вопросом</p>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-database"></i>
-                        <h3>Синхронизация с БД</h3>
-                        <p>Актуальные данные из PostgreSQL</p>
-                    </div>
+                <div class="db-placeholder">
+                    <div class="coming-soon">Скоро здесь появятся все сеансы</div>
                 </div>
             </div>
         </section>
@@ -138,7 +99,7 @@
         <div class="container footer-container">
             <div class="footer-col">
                 <h4>Absolute cinema</h4>
-                <p>Самый удобный сервис покупки билетов. Интеграция с базами данных киносети.</p>
+                <p>Самый удобный сервис покупки билетов.</p>
             </div>
             <div class="footer-col">
                 <h4>Контакты</h4>
@@ -151,14 +112,13 @@
         <div class="modal-content">
             <span class="close-modal">&times;</span>
             <div class="modal-header">
-                <i class="fas fa-user-astronaut"></i>
                 <h2>Вход в аккаунт</h2>
             </div>
             <div class="modal-body">
                 <form id="authForm">
                     <div class="form-group">
                         <label>Телефон</label>
-                        <input type="text" placeholder="+7 999 888-77-66" required id="loginPhone">
+                        <input type="text" required id="loginPhone">
                     </div>
                     <div class="form-group">
                         <label>Пароль</label>
@@ -173,24 +133,23 @@
 
     <div id="registerModal" class="modal">
         <div class="modal-content">
-            <span class="close-modal-reg">&times;</span>
+            <span class="close-modal">&times;</span>
             <div class="modal-header">
-                <i class="fas fa-user-plus"></i>
                 <h2>Регистрация</h2>
             </div>
             <div class="modal-body">
                 <form id="registerForm">
                     <div class="form-group">
                         <label>Имя</label>
-                        <input type="text" placeholder="Алексей" required id="regName">
+                        <input type="text" required id="regName">
                     </div>
                     <div class="form-group">
                         <label>Номер телефона</label>
-                        <input type="tel" placeholder="+7 900 123-45-67" required id="regPhone">
+                        <input type="tel" required id="regPhone">
                     </div>
                     <div class="form-group">
                         <label>Пароль</label>
-                        <input type="password" placeholder="минимум 6 символов" required id="regPassword">
+                        <input type="password" required id="regPassword">
                     </div>
                     <button type="submit" class="btn-auth-submit">Зарегистрироваться</button>
                     <p class="auth-switch">Уже смешарик? <a href="#" id="showLoginLink">Войти</a></p>
@@ -253,7 +212,7 @@
         if(authForm) {
             authForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                alert('✅ Добро пожаловать! (демо-вход выполнен успешно)');
+                alert('Добро пожаловать! (демо-вход выполнен успешно)');
                 closeAuthModal();
                 authForm.reset();
             });
@@ -270,23 +229,12 @@
                     alert('Пожалуйста, заполните имя и телефон');
                     return;
                 }
-                alert(`🎉 Регистрация прошла успешно, ${name}! Теперь вы можете войти.`);
+                alert(`Регистрация прошла успешно, ${name}! Теперь вы можете войти.`);
                 closeRegModal();
                 registerForm.reset();
                 openAuthModal();
             });
         }
-
-        // ---------- ЗАГЛУШКА БАЗЫ ДАННЫХ ДЛЯ ФИЛЬМОВ ----------
-        // Вместо реальной БД — демо-фильмы, но с пометкой "из БД"
-        const moviesDatabase = [
-            { title: 'Дюна: Часть вторая', genre: 'фантастика', duration: '166 мин', year: '2024', rating: '9.2', dbBadge: true },
-            { title: 'Мастер и Маргарита', genre: 'драма', duration: '157 мин', year: '2024', rating: '8.7',  dbBadge: true },
-            { title: 'Головоломка 2', genre: 'мультфильм', duration: '96 мин', year: '2024', rating: '8.9',  dbBadge: true },
-            { title: 'Фуриоса', genre: 'боевик', duration: '148 мин', year: '2024', rating: '7.9', dbBadge: true },
-            { title: 'Оппенгеймер', genre: 'драма', duration: '180 мин', year: '2023', rating: '8.8', dbBadge: true },
-            { title: 'Барби', genre: 'фантастика', duration: '114 мин', year: '2023', rating: '7.1', dbBadge: true }
-        ];
 
         function renderMovies(filterGenre = 'all') {
             const container = document.getElementById('allMoviesGrid');
@@ -327,31 +275,6 @@
         });
         renderMovies('all');
 
-        // ---------- ДАННЫЕ СЕАНСОВ (РАСПИСАНИЕ) ----------
-        const showtimesData = {
-            'Киноцентр': [
-                { movie: 'Дюна: Часть вторая', time: '14:30', price: '350 ₽', hall: 'Зал 1' },
-                { movie: 'Мастер и Маргарита', time: '17:45', price: '380 ₽', hall: 'Зал 2' },
-                { movie: 'Головоломка 2', time: '20:00', price: '300 ₽', hall: 'Зал 3' },
-                { movie: 'Фуриоса', time: '22:15', price: '420 ₽', hall: 'IMAX' }
-            ],
-            'Люксор': [
-                { movie: 'Дюна: Часть вторая', time: '15:00', price: '400 ₽', hall: 'Зал A' },
-                { movie: 'Головоломка 2', time: '12:30', price: '290 ₽', hall: 'Зал B' },
-                { movie: 'Мастер и Маргарита', time: '19:20', price: '390 ₽', hall: 'Зал C' }
-            ],
-            'Каро 8': [
-                { movie: 'Фуриоса', time: '16:10', price: '450 ₽', hall: 'Зал 4' },
-                { movie: 'Дюна: Часть вторая', time: '18:50', price: '470 ₽', hall: 'Зал 5' },
-                { movie: 'Головоломка 2', time: '11:20', price: '280 ₽', hall: 'Детский зал' }
-            ],
-            'Формула Кино': [
-                { movie: 'Мастер и Маргарита', time: '20:30', price: '430 ₽', hall: 'VIP' },
-                { movie: 'Дюна: Часть вторая', time: '21:00', price: '490 ₽', hall: 'Зал 1' },
-                { movie: 'Фуриоса', time: '23:00', price: '460 ₽', hall: 'Зал 2' }
-            ]
-        };
-
         const cinemaBtns = document.querySelectorAll('.cinema-btn');
         const showtimesContainer = document.getElementById('showtimesContainer');
 
@@ -369,7 +292,7 @@
             showtimesContainer.innerHTML = html;
             document.querySelectorAll('.btn-buy-session').forEach(btn => {
                 btn.addEventListener('click', () => { 
-                    alert(`🪑 Бронирование мест\nФильм: ${btn.dataset.movie}\nКинотеатр: ${btn.dataset.cinema}\nВремя: ${btn.dataset.time}\nЦена: ${btn.dataset.price}\n(Выбор мест в зале — демо)`); 
+                    alert(`Бронирование мест\nФильм: ${btn.dataset.movie}\nКинотеатр: ${btn.dataset.cinema}\nВремя: ${btn.dataset.time}\nЦена: ${btn.dataset.price}\n(Выбор мест в зале — демо)`); 
                 });
             });
         }
@@ -387,14 +310,14 @@
                 setActiveCinemaBtn(btn.dataset.cinema); 
             });
         });
-        renderShowtimes('Киноцентр');
-        setActiveCinemaBtn('Киноцентр');
+        renderShowtimes('Кинотеатр');
+        setActiveCinemaBtn('Кинотеатр');
 
         // кнопки "Расписание и билеты" (в блоке кинотеатров демо)
         document.querySelectorAll('.btn-cinema-schedule').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const cinema = btn.getAttribute('data-cinema') || 'кинотеатр';
-                alert(`🎟️ Расписание сеансов "${cinema}" загружено из базы данных. Переход к выбору времени.`);
+                alert(`Расписание сеансов "${cinema}" загружено из базы данных. Переход к выбору времени.`);
                 document.querySelector('#buy-ticket-section').scrollIntoView({ behavior: 'smooth' });
                 // эмуляция: активируем кнопку нужного кинотеатра
                 const targetBtn = Array.from(cinemaBtns).find(b => b.dataset.cinema === cinema);

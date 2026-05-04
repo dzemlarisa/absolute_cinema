@@ -127,7 +127,17 @@ h3 {
     transform: scale(1.02);
 }
 
-/* ----- HERO SECTION (общий) ----- */
+.auth-switch {
+    text-align: center;
+    margin-top: 1rem;
+    color: #a1a1aa;
+}
+.auth-switch a {
+    color: #f5c518;
+    text-decoration: none;
+}
+
+/* ----- HERO SECTION ----- */
 .hero {
     background: linear-gradient(135deg, #1e1e2a 0%, #0b0b10 100%);
     padding: 4rem 0;
@@ -142,6 +152,30 @@ h3 {
 
 .hero.small-hero {
     padding: 2.5rem 0;
+}
+
+.buy-ticket-hero {
+    background: linear-gradient(135deg, #1e1e2a 0%, #0b0b10 100%);
+    padding: 2rem 0;
+    text-align: center;
+    border-bottom: 1px solid #2a2a2f;
+}
+
+.buy-ticket-hero h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.ticket-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 24px;
+}
+
+.ticket-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
 }
 
 /* ----- MOVIES GRID (карточки фильмов) ----- */
@@ -244,10 +278,17 @@ h3 {
 }
 
 /* ----- СЕАНСЫ И КИНОТЕАТРЫ (главная) ----- */
+.cinemas {
+    background: #0a0a0e;
+    padding: 4rem 0;
+    border-top: 1px solid #2a2a2e;
+    border-bottom: 1px solid #2a2a2e;
+}
+
 .cinema-showtimes {
     background: #0a0a0e;
     padding: 4rem 0;
-    border-top: 1px solid #26262c;
+    border-top: 1px solid #2a2a2e;
 }
 
 .cinema-filter {
@@ -549,6 +590,177 @@ h3 {
     font-size: 1.2rem;
 }
 
+/* Карточка сеанса */
+.session-info-card {
+    background: #18181e;
+    border-radius: 28px;
+    border: 1px solid #2c2c30;
+    overflow: hidden;
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+}
+
+.session-header {
+    background: linear-gradient(135deg, #f5c51820, #1a1a20);
+    padding: 1.5rem;
+    border-bottom: 1px solid #2c2c30;
+}
+
+.session-header h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+    color: #f5c518;
+}
+
+.session-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: #a1a1aa;
+}
+
+.session-detail-item {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #2c2c30;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.session-detail-item .label {
+    color: #a1a1aa;
+    font-weight: 500;
+}
+
+.session-detail-item .value {
+    font-weight: 600;
+    color: #f5c518;
+}
+
+.seats-available {
+    color: #4ade80 !important;
+    background: #4ade8010;
+    padding: 0.25rem 0.75rem;
+    border-radius: 40px;
+    font-size: 0.9rem;
+}
+
+.price-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #f5c518;
+}
+
+/* Карточка покупки */
+.purchase-card {
+    background: #18181e;
+    border-radius: 28px;
+    border: 1px solid #2c2c30;
+    padding: 1.5rem;
+}
+
+.purchase-card h3 {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ticket-count-section {
+    background: #202024;
+    border-radius: 20px;
+    padding: 1.5rem;
+}
+
+.ticket-count-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.ticket-count-control label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #e4e4e7;
+}
+
+.ticket-count-control input {
+    width: 120px;
+    padding: 0.75rem;
+    border-radius: 16px;
+    background: #2a2a30;
+    border: 1px solid #3c3c44;
+    color: white;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.total-price-block {
+    text-align: center;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: #18181e;
+    border-radius: 20px;
+}
+
+.total-label {
+    font-size: 0.9rem;
+    color: #a1a1aa;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.total-amount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #f5c518;
+}
+
+.btn-buy {
+    background: #f5c518;
+    border: none;
+    width: 100%;
+    padding: 1rem;
+    border-radius: 40px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: 0.2s;
+    color: #121212;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-buy:hover {
+    background: #ffda44;
+    transform: scale(1.01);
+    box-shadow: 0 6px 20px rgba(245,197,24,0.3);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #a1a1aa;
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    transition: 0.2s;
+}
+
+.back-link:hover {
+    color: #f5c518;
+}
+
+
 /* ----- FOOTER ----- */
 .main-footer {
     background: #07070a;
@@ -655,6 +867,10 @@ h3 {
     color: #f5c518;
 }
 
+.modal-body {
+    padding: 1.5rem;
+}
+
 .form-group {
     margin-bottom: 1.2rem;
 }
@@ -687,16 +903,6 @@ h3 {
     cursor: pointer;
 }
 
-.auth-switch {
-    text-align: center;
-    margin-top: 1.2rem;
-    font-size: 0.85rem;
-}
-
-.auth-switch a {
-    color: #f5c518;
-    text-decoration: none;
-}
 
 .demo-note {
     background: #2a2a2f;
@@ -710,21 +916,10 @@ h3 {
 .db-placeholder {
     text-align: center;
     padding: 3rem;
-    background: linear-gradient(135deg, #1e1e2a, #13131a);
     border-radius: 32px;
-    border: 1px dashed #f5c51860;
     margin: 2rem 0;
 }
-.db-placeholder i {
-    font-size: 3rem;
-    color: #f5c518;
-    margin-bottom: 1rem;
-    opacity: 0.7;
-}
-.db-placeholder p {
-    color: #a1a1aa;
-    font-size: 1rem;
-}
+
 .db-placeholder small {
     color: #6b6b76;
 }
@@ -737,6 +932,7 @@ h3 {
     display: inline-flex;
     padding: 0.3rem 1rem;
     border-radius: 40px;
+    text-align: center;
     font-size: 0.8rem;
 }
 
@@ -789,5 +985,8 @@ h3 {
     }
     .map-placeholder {
         padding: 1.8rem;
+    }
+    .ticket-grid {
+        grid-template-columns: 1fr;
     }
 }
