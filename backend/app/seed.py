@@ -1,12 +1,9 @@
-import os
-from sqlalchemy import create_engine, Column, Integer, String, Text
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, Integer, String, Text
 from passlib.context import CryptContext
 from sqlalchemy_utils import database_exists, create_database
 
-from database import engine, get_db, SessionLocal
-from models import Base, User, Seat, Type, Booking, Status, Role
+from database import engine, SessionLocal
+from models import Base, User, Role
 
 INIT_ROLES = [
     {"name": "Админ"},

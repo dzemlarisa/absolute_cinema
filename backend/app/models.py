@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Numeric, CheckConstraint
 from sqlalchemy.orm import declarative_base, relationship
+
 from datetime import datetime
 
 Base = declarative_base()
@@ -119,11 +120,10 @@ class Ticket(Base):
     def __repr__(self):
         return f"<Ticket(id={self.id}, user_id={self.user_id}, session_id={self.session_id}, ticket_cnt={self.ticket_cnt}, total={self.total}, status='{self.status}')>"
 
-
 def create_tables(engine):
     """
     Функция для создания всех таблиц в базе данных
-    :param engine: подключение SQLAlchemy (create_engine)
     """
     Base.metadata.create_all(engine)
     print("Все таблицы успешно созданы (или уже существуют)")
+
