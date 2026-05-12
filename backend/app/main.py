@@ -460,6 +460,7 @@ async def delete_movie(
     db.commit()
     return {"message": "Фильм успешно удалён"}
 
+#-------------------------не работает---------------------
 @app.get("/movies/genres")
 async def get_genres(
     current_user: User = Depends(get_current_user),
@@ -477,3 +478,80 @@ async def get_directors(
     """Возвращает список режиссёров"""
     directors = db.query(Movie.director).distinct().all()
     return [director[0] for director in directors if director[0]]
+#--------------------------------------------------------
+
+#эндпоинты для кинотеатров
+@app.get("/cinemas", response_model=List[CinemaResponse])
+async def get_cinemas(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Возвращает список кинотеатров"""
+    return db.query(Cinema).all()
+
+@app.get("/cinemas/{cinema_id}", response_model=CinemaResponse)
+async def get_cinema(
+    cinema_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Возвращает информацию о кинотеатре по его id"""
+    cinema = db.query(Cinema).filter(Cinema.id == cinema_id).first()
+    if not cinema:
+        raise HTTPException(status_code=404, detail="Кинотеатр не найден")
+    return cinema
+
+@app.post("/cinemas", response_model=CinemaResponse)
+async def create_cinema(
+    cinema_data: CinemaCreate,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Добавляет новый кинотеатр"""
+    existing_cinema = db.query(Cinema).filter(Cinema.name == cinema_data.name).first()
+    if existing_cinema:
+        raise HTTPException(status_code=400, detail="Кинотеатр с таким названием уже существует")
+    
+    new_cinema = Cinema(**cinema_data.model_dump())
+    db.add(new_cinema)
+    db.commit()
+    db.refresh(new_cinema)
+    return new_cinema
+
+@app.put("/cinemas/{cinema_id}", response_model=CinemaResponse)
+async def update_cinema(
+    cinema_id: int,
+    cinema_data: CinemaUpdate,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Обновляет информацию о кинотеатре"""
+    cinema = db.query(Cinema).filter(Cinema.id == cinema_id).first()
+    if not cinema:
+        raise HTTPException(status_code=404, detail="Кинотеатр не найден")
+    
+    for key, value in cinema_data.model_dump(exclude_unset=True).items():
+        setattr(cinema, key, value)
+    
+    db.commit()
+    db.refresh(cinema)
+    return cinema
+
+@app.delete("/cinemas/{cinema_id}")
+async def delete_cinema(
+    cinema_id: int,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Удаляет кинотеатр по id"""
+    cinema = db.query(Cinema).filter(Cinema.id == cinema_id).first()
+    if not cinema:
+        raise HTTPException(status_code=404, detail="Кинотеатр не найден")
+
+    active_sessions = db.query(SessionModel).filter(SessionModel.cinema_id == cinema_id).first()
+    if active_sessions:
+        raise HTTPException(status_code=400, detail="Невозможно удалить кинотеатр с активными сеансами")
+    
+    db.delete(cinema)
+    db.commit()
+    return {"message": "Кинотеатр успешно удалён"}
