@@ -36,6 +36,7 @@ class Movie(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(200), nullable=False)
+    year = Column(Integer, nullable=False)
     director = Column(String(100), nullable=False)
     operator = Column(String(100), nullable=True)
     actors = Column(String(500), nullable=True)
@@ -48,7 +49,6 @@ class Movie(Base):
     
     def __repr__(self):
         return f"<Movie(id={self.id}, name='{self.name}', director='{self.director}', genre='{self.genre}')>"
-
 
 class Cinema(Base):
     __tablename__ = 'cinemas'
@@ -111,7 +111,6 @@ class Ticket(Base):
     
     user = relationship('User', back_populates='tickets')
     session = relationship('Session', back_populates='tickets')
-    
 
     __table_args__ = (
         CheckConstraint('ticket_cnt > 0', name='check_ticket_cnt_positive'),
@@ -124,6 +123,7 @@ def create_tables(engine):
     """
     Функция для создания всех таблиц в базе данных
     """
+
     Base.metadata.create_all(engine)
     print("Все таблицы успешно созданы (или уже существуют)")
 

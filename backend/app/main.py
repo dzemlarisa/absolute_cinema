@@ -1,9 +1,9 @@
 import jwt
-from fastapi import FastAPI, Depends, HTTPException, Path, status
+from fastapi import FastAPI, Depends, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy import text, create_engine
+from sqlalchemy import text, create_engine, and_, or_
 from typing import List, Optional
 from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel, validator
@@ -11,17 +11,8 @@ from passlib.context import CryptContext
 from jwt.exceptions import PyJWTError
 import pytz
 
-import os
-print("=== DEBUG DATABASE ===")
-print("DATABASE_URL from env:", os.getenv("DATABASE_URL"))
-print("=" * 50)
-
-from database import get_db, DATABASE_URL
-print("DATABASE_URL from database.py:", DATABASE_URL)
-print("=" * 50)
-
-
-from models import create_tables, Role, User, Movie, Cinema, Hall, Session, Ticket
+from database import get_db, engine, DATABASE_URL
+from models import create_tables, Base, Role, User, Movie, Cinema, Hall, Session as SessionModel, Ticket
 
 engine = create_engine(
     DATABASE_URL,
@@ -58,7 +49,107 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-#здесь будут классы
+
+class MovieBase(BaseModel):
+    name: str
+    year: int
+    director: str
+    operator: Optional[str] = None
+    actors: Optional[str] = None
+    genre: str
+    studio: Optional[str] = None
+    time: str
+    price: float
+
+class MovieCreate(MovieBase):
+    pass
+
+class MovieUpdate(BaseModel):
+    name: Optional[str] = None
+    year: Optional[int] = None
+    director: Optional[str] = None
+    operator: Optional[str] = None
+    actors: Optional[str] = None
+    genre: Optional[str] = None
+    studio: Optional[str] = None
+    time: Optional[str] = None
+    price: Optional[float] = None
+
+class MovieResponse(MovieBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+class CinemaBase(BaseModel):
+    name: str
+    address: str
+
+class CinemaCreate(CinemaBase):
+    pass
+
+class CinemaUpdate(BaseModel):
+    name: Optional[str] = None
+    address: Optional[str] = None
+
+class CinemaResponse(CinemaBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+class HallBase(BaseModel):
+    name: str
+    capacity: int
+
+class HallCreate(HallBase):
+    pass
+
+class HallResponse(HallBase):
+    id: int
+    cinema_id: int
+    class Config:
+        from_attributes = True
+
+class SessionBase(BaseModel):
+    cinema_id: int
+    hall_id: int
+    movie_id: int
+    start_time: datetime
+    end_time: datetime
+
+class SessionCreate(SessionBase):
+    remaining_seats: Optional[int] = None
+
+class SessionResponse(SessionBase):
+    id: int
+    remaining_seats: int
+    class Config:
+        from_attributes = True
+
+class TicketBase(BaseModel):
+    session_id: int
+    ticket_cnt: int
+
+class TicketCreate(TicketBase):
+    pass
+
+class TicketResponse(BaseModel):
+    id: int
+    user_id: int
+    session_id: int
+    ticket_cnt: int
+    total: float
+    status: str
+    class Config:
+        from_attributes = True
+
+class UserResponse(BaseModel):
+    id: int
+    phone: str
+    name: str
+    role_id: int
+    class Config:
+        from_attributes = True
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -258,3 +349,131 @@ def logout():
     Выход из системы
     """
     return {"message": "Выход выполнен успешно"}
+
+@app.get("/users", response_model=List[UserResponse])
+async def get_users(
+
+    db: Session = Depends(get_db)
+):
+    """Возвращает список всех пользователей"""
+    users = db.query(User).all()
+    return users
+
+#Эндпоинты для фильмов
+@app.get("/movies", response_model=List[MovieResponse])
+async def get_movies(
+    genre: Optional[str] = Query(None, description="Фильтр по жанру"),
+    director: Optional[str] = Query(None, description="Фильтр по режиссёру"),
+    year: Optional[int] = Query(None, description="Фильтр по году выпуска"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Возвращает список всех фильмов с возможностью фильтрации по жанру, режиссёру, году"""
+    query = db.query(Movie)
+    
+    if genre:
+        query = query.filter(Movie.genre.ilike(f"%{genre}%"))
+    if director:
+        query = query.filter(Movie.director.ilike(f"%{director}%"))
+    if year:
+        query = query.filter(Movie.year == year)
+    
+    return query.all()
+
+@app.get("/movies/{movie_id}", response_model=MovieResponse)
+async def get_movie(
+    movie_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Возвращает информацию о фильме по его id"""
+    movie = db.query(Movie).filter(Movie.id == movie_id).first()
+    if not movie:
+        raise HTTPException(status_code=404, detail="Фильм не найден")
+    return movie
+
+@app.post("/movies", response_model=MovieResponse)
+async def create_movie(
+    movie_data: MovieCreate,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Добавляет новый фильм"""
+    try:
+        existing_movie = db.query(Movie).filter(Movie.name == movie_data.name).first()
+        if existing_movie:
+            raise HTTPException(status_code=400, detail="Фильм с таким названием уже существует")
+        
+        new_movie = Movie(**movie_data.model_dump())
+        db.add(new_movie)
+        db.commit()
+        db.refresh(new_movie)
+        return new_movie
+    except Exception as e:
+        print(f"ОШИБКА: {type(e).__name__}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/movies/{movie_id}", response_model=MovieResponse)
+async def update_movie(
+    movie_id: int,
+    movie_data: MovieUpdate,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    try:
+        movie = db.query(Movie).filter(Movie.id == movie_id).first()
+        if not movie:
+            raise HTTPException(status_code=404, detail="Фильм не найден")
+        
+        update_data = movie_data.model_dump(exclude_unset=True)
+        print(f"Обновляем поля: {update_data}")
+        
+        for key, value in update_data.items():
+            if value is not None:
+                setattr(movie, key, value)
+        
+        db.commit()
+        db.refresh(movie)
+        return movie
+        
+    except Exception as e:
+        db.rollback()
+        print(f"Ошибка: {type(e).__name__}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/movies/{movie_id}")
+async def delete_movie(
+    movie_id: int,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Удаляет фильм по id"""
+    movie = db.query(Movie).filter(Movie.id == movie_id).first()
+    if not movie:
+        raise HTTPException(status_code=404, detail="Фильм не найден")
+    
+    active_sessions = db.query(SessionModel).filter(SessionModel.movie_id == movie_id).first()
+    if active_sessions:
+        raise HTTPException(status_code=400, detail="Невозможно удалить фильм с активными сеансами")
+    
+    db.delete(movie)
+    db.commit()
+    return {"message": "Фильм успешно удалён"}
+
+@app.get("/movies/genres")
+async def get_genres(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Возвращает список жанров"""
+    genres = db.query(Movie.genre).distinct().all()
+    return [genre[0] for genre in genres if genre[0]]
+
+@app.get("/movies/directors")
+async def get_directors(
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Возвращает список режиссёров"""
+    directors = db.query(Movie.director).distinct().all()
+    return [director[0] for director in directors if director[0]]
