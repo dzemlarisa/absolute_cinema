@@ -555,3 +555,66 @@ async def delete_cinema(
     db.delete(cinema)
     db.commit()
     return {"message": "Кинотеатр успешно удалён"}
+
+#эндпоинты для залов
+@app.get("/cinemas/{cinema_id}/halls", response_model=List[HallResponse])
+async def get_cinema_halls(
+    cinema_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Возвращает список залов конкретного кинотеатра"""
+    cinema = db.query(Cinema).filter(Cinema.id == cinema_id).first()
+    if not cinema:
+        raise HTTPException(status_code=404, detail="Кинотеатр не найден")
+    
+    return db.query(Hall).filter(Hall.cinema_id == cinema_id).all()
+
+@app.get("/halls/{hall_id}", response_model=HallResponse)
+async def get_hall(
+    hall_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Возвращает информацию о зале по его id"""
+    hall = db.query(Hall).filter(Hall.id == hall_id).first()
+    if not hall:
+        raise HTTPException(status_code=404, detail="Зал не найден")
+    return hall
+
+@app.post("/cinemas/{cinema_id}/halls", response_model=HallResponse)
+async def create_hall(
+    cinema_id: int,
+    hall_data: HallCreate,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Добавляет новый зал в кинотеатр"""
+    cinema = db.query(Cinema).filter(Cinema.id == cinema_id).first()
+    if not cinema:
+        raise HTTPException(status_code=404, detail="Кинотеатр не найден")
+    
+    new_hall = Hall(cinema_id=cinema_id, **hall_data.dict())
+    db.add(new_hall)
+    db.commit()
+    db.refresh(new_hall)
+    return new_hall
+
+@app.delete("/halls/{hall_id}")
+async def delete_hall(
+    hall_id: int,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Удаляет зал по id"""
+    hall = db.query(Hall).filter(Hall.id == hall_id).first()
+    if not hall:
+        raise HTTPException(status_code=404, detail="Зал не найден")
+    
+    active_sessions = db.query(SessionModel).filter(SessionModel.hall_id == hall_id).first()
+    if active_sessions:
+        raise HTTPException(status_code=400, detail="Невозможно удалить зал с активными сеансами")
+    
+    db.delete(hall)
+    db.commit()
+    return {"message": "Зал успешно удалён"}
