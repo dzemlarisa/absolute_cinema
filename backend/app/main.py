@@ -58,7 +58,7 @@ class MovieBase(BaseModel):
     actors: Optional[str] = None
     genre: str
     studio: Optional[str] = None
-    time: str
+    time: int
     price: float
 
 class MovieCreate(MovieBase):
@@ -72,7 +72,7 @@ class MovieUpdate(BaseModel):
     actors: Optional[str] = None
     genre: Optional[str] = None
     studio: Optional[str] = None
-    time: Optional[str] = None
+    time: Optional[int] = None
     price: Optional[float] = None
 
 class MovieResponse(MovieBase):
@@ -113,11 +113,10 @@ class SessionBase(BaseModel):
     cinema_id: int
     hall_id: int
     movie_id: int
-    start_time: datetime
-    end_time: datetime
+    start_time: str
 
 class SessionCreate(SessionBase):
-    remaining_seats: Optional[int] = None
+    pass
 
 class SessionResponse(SessionBase):
     id: int
@@ -618,3 +617,149 @@ async def delete_hall(
     db.delete(hall)
     db.commit()
     return {"message": "Зал успешно удалён"}
+
+#эндпоинты для сеансов
+@app.get("/sessions", response_model=List[SessionResponse])
+async def get_sessions(
+    movie_id: Optional[int] = Query(None, description="Фильтр по ID фильма"),
+    cinema_id: Optional[int] = Query(None, description="Фильтр по ID кинотеатра"),
+    date: Optional[str] = Query(None, description="Фильтр по дате (YYYY-MM-DD)"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Возвращает список сеансов с возможностью фильтрации"""
+    query = db.query(SessionModel)
+    
+    if movie_id:
+        query = query.filter(SessionModel.movie_id == movie_id)
+    if cinema_id:
+        query = query.filter(SessionModel.cinema_id == cinema_id)
+    if date:
+        target_date = datetime.strptime(date, "%Y-%m-%d").date()
+        query = query.filter(
+            and_(
+                SessionModel.start_time >= target_date,
+                SessionModel.start_time < target_date.replace(day=target_date.day + 1)
+            )
+        )
+    
+    return query.all()
+
+@app.get("/sessions/{session_id}", response_model=SessionResponse)
+async def get_session(
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Возвращает информацию о сеансе по его id"""
+    session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Сеанс не найден")
+    return session
+
+@app.post("/sessions", response_model=SessionResponse)
+async def create_session(
+    session_data: SessionCreate,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Добавляет новый сеанс"""
+    #moscow_tz = pytz.timezone('Europe/Moscow')
+    #start_time = moscow_tz.localize(naive_start_time)
+
+    start_time_str = session_data.start_time
+    start_time = datetime.strptime(start_time_str, '%Y-%m-%d %H:%M')
+    
+    movie = db.query(Movie).filter(Movie.id == session_data.movie_id).first()
+    if not movie:
+        raise HTTPException(status_code=404, detail="Фильм не найден")
+    
+    cinema = db.query(Cinema).filter(Cinema.id == session_data.cinema_id).first()
+    if not cinema:
+        raise HTTPException(status_code=404, detail="Кинотеатр не найден")
+    
+    hall = db.query(Hall).filter(Hall.id == session_data.hall_id).first()
+    if not hall:
+        raise HTTPException(status_code=404, detail="Зал не найден")
+    
+    if hall.cinema_id != session_data.cinema_id:
+        raise HTTPException(status_code=400, detail="Зал не принадлежит указанному кинотеатру")
+    
+    if start_time.minute % 5 != 0:
+        raise HTTPException(400, "Время должно быть кратно 5 минутам")    
+    
+    movie_duration = int(movie.time)
+    end_time = start_time + timedelta(minutes=movie_duration)
+    
+    overlapping = db.query(SessionModel).filter(
+        and_(
+            SessionModel.hall_id == session_data.hall_id,
+            SessionModel.start_time < end_time,
+            SessionModel.end_time > start_time
+        )
+    ).first()
+    
+    if overlapping:
+        raise HTTPException(
+            status_code=400, 
+            detail="Время сеанса пересекается с существующим сеансом в этом зале"
+        )
+    
+    new_session = SessionModel(
+        movie_id=session_data.movie_id,
+        cinema_id=session_data.cinema_id,
+        hall_id=session_data.hall_id,
+        start_time=start_time,
+        end_time=end_time,
+        remaining_seats=hall.capacity
+    )
+    
+    db.add(new_session)
+    db.commit()
+    db.refresh(new_session)
+    return new_session
+
+@app.delete("/sessions/{session_id}")
+async def delete_session(
+    session_id: int,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Удаляет сеанс по id"""
+    session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Сеанс не найден")
+    
+    tickets = db.query(Ticket).filter(Ticket.session_id == session_id).first()
+    if tickets:
+        raise HTTPException(status_code=400, detail="Невозможно удалить сеанс с проданными билетами")
+    
+    db.delete(session)
+    db.commit()
+    return {"message": "Сеанс успешно удалён"}
+
+@app.get("/movies/{movie_id}/sessions", response_model=List[SessionResponse])
+async def get_movie_sessions(
+    movie_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Возвращает список сеансов для конкретного фильма"""
+    movie = db.query(Movie).filter(Movie.id == movie_id).first()
+    if not movie:
+        raise HTTPException(status_code=404, detail="Фильм не найден")
+    
+    return db.query(SessionModel).filter(SessionModel.movie_id == movie_id).all()
+
+@app.get("/cinemas/{cinema_id}/sessions", response_model=List[SessionResponse])
+async def get_cinema_sessions(
+    cinema_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Возвращает список сеансов для конкретного кинотеатра"""
+    cinema = db.query(Cinema).filter(Cinema.id == cinema_id).first()
+    if not cinema:
+        raise HTTPException(status_code=404, detail="Кинотеатр не найден")
+    
+    return db.query(SessionModel).filter(SessionModel.cinema_id == cinema_id).all()

@@ -13,7 +13,7 @@
     <header class="main-header">
         <div class="container header-container">
             <div class="logo">
-                <a href="#"></i> Absolute cinema</a>
+                <a href="#">Absolute cinema</a>
             </div>
             <nav class="main-nav">
                 <ul class="nav-list">
@@ -54,15 +54,7 @@
                     <h2>Все фильмы</h2>
                     <span class="section-subtitle">Новинки, хиты, легендарные картины</span>
                 </div>
-                <div class="filter-bar">
-                    <div class="filter-buttons">
-                        <button class="filter-btn active-filter" data-filter="all">Все жанры</button>
-                        <button class="filter-btn" data-filter="фантастика">Фантастика</button>
-                        <button class="filter-btn" data-filter="драма">Драма</button>
-                        <button class="filter-btn" data-filter="мультфильм">Мультфильмы</button>
-                        <button class="filter-btn" data-filter="боевик">Боевик</button>
-                    </div>
-                </div>
+
                 <div class="db-placeholder">
                     <div class="coming-soon"> Скоро здесь появятся все фильмы</div>
                 </div>
@@ -76,15 +68,7 @@
                     <h2>Выберите сеанс</h2>
                     <span class="section-subtitle">Кинотеатры, расписание, цены</span>
                 </div>
-                <div class="filter-bar">
-                    <div class="filter-buttons" id="cinemaFilterButtons">
-                        <button class="filter-btn active-filter" data-cinema="all">Все кинотеатры</button>
-                        <button class="filter-btn" data-cinema="Кинотеатр 1">Кинотеатр 1</button>
-                        <button class="filter-btn" data-cinema="Кинотеатр 2">Кинотеатр 2</button>
-                        <button class="filter-btn" data-cinema="Кинотеатр 3">Кинотеатр 3</button>
-                        <button class="filter-btn" data-cinema="Кинотеатр 4">Кинотеатр 4</button>
-                    </div>
-                </div>
+
                 <div id="showtimesContainer">
                     <!-- динамические сеансы -->
                 </div>
@@ -207,7 +191,7 @@
             });
         }
 
-        // Логин форма (демо)
+        // Логин форма
         const authForm = document.getElementById('authForm');
         if(authForm) {
             authForm.addEventListener('submit', (e) => {
@@ -323,24 +307,6 @@
                 const targetBtn = Array.from(cinemaBtns).find(b => b.dataset.cinema === cinema);
                 if(targetBtn) {
                     targetBtn.click();
-                }
-            });
-        });
-
-        // Дополнительно: подсветка активного пункта навигации при скролле (опционально)
-        const sections = document.querySelectorAll('#cinemas-section, #movies-section, #buy-ticket-section');
-        window.addEventListener('scroll', () => {
-            let current = '';
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop - 100;
-                if(pageYOffset >= sectionTop) {
-                    current = section.getAttribute('id');
-                }
-            });
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active-link');
-                if(link.getAttribute('href') === `#${current}`) {
-                    link.classList.add('active-link');
                 }
             });
         });

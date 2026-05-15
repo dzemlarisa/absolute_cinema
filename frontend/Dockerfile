@@ -1,10 +1,9 @@
-FROM node:18-alpine
+FROM node:22-alpine
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-# Создаем символическую ссылку или копируем index.html в нужное место
-#RUN mkdir -p public && \
-#    ( [ -f index.html ] && cp index.html public/ || true )
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+RUN npm run build || true
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

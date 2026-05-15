@@ -43,7 +43,7 @@ class Movie(Base):
     genre = Column(String(50), nullable=False)
     studio = Column(String(100), nullable=True)
     time = Column(String(10), nullable=False)
-    price = Column(Numeric(10, 2), nullable=False)
+    price = Column(Integer, nullable=False)
     
     sessions = relationship('Session', back_populates='movie', cascade='all, delete-orphan')
     
@@ -84,8 +84,8 @@ class Session(Base):
     cinema_id = Column(Integer, ForeignKey('cinemas.id', ondelete='CASCADE'), nullable=False)
     hall_id = Column(Integer, ForeignKey('halls.id', ondelete='CASCADE'), nullable=False)
     movie_id = Column(Integer, ForeignKey('movies.id', ondelete='CASCADE'), nullable=False)
-    start_time = Column(DateTime, nullable=False)
-    end_time = Column(DateTime, nullable=False)
+    start_time = Column(String(50), nullable=False)
+    end_time = Column(String(50), nullable=False)
     remaining_seats = Column(Integer, nullable=False)
     
     cinema = relationship('Cinema', back_populates='sessions')
@@ -123,7 +123,7 @@ def create_tables(engine):
     """
     Функция для создания всех таблиц в базе данных
     """
-
+    #Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     print("Все таблицы успешно созданы (или уже существуют)")
 
