@@ -18,9 +18,9 @@
                 </div>
             </div>
         </div>
+    </header>
 
-        <!-- Модальное окно входа -->
-        <div v-if="showLoginModal" class="modal" @click.self="closeModals">
+    <div v-if="showLoginModal" class="modal" @click.self="closeModals">
             <div class="modal-content">
                 <span class="close-modal" @click="closeModals">&times;</span>
                 <div class="modal-header">
@@ -34,7 +34,7 @@
                                 type="tel" 
                                 v-model="loginForm.phone"
                                 required 
-                                placeholder="+7 (999) 123-45-67"
+                                placeholder="89991234567"
                             >
                         </div>
                         <div class="form-group">
@@ -59,7 +59,6 @@
             </div>
         </div>
 
-        <!-- Модальное окно регистрации -->
         <div v-if="showRegisterModal" class="modal" @click.self="closeModals">
             <div class="modal-content">
                 <span class="close-modal" @click="closeModals">&times;</span>
@@ -73,8 +72,7 @@
                             <input 
                                 type="text" 
                                 v-model="registerForm.name"
-                                required 
-                                placeholder="Ваше имя"
+                                required
                             >
                         </div>
                         <div class="form-group">
@@ -83,7 +81,7 @@
                                 type="tel" 
                                 v-model="registerForm.phone"
                                 required 
-                                placeholder="+7 (999) 123-45-67"
+                                placeholder="89991234567"
                             >
                         </div>
                         <div class="form-group">
@@ -92,16 +90,6 @@
                                 type="password" 
                                 v-model="registerForm.password"
                                 required 
-                                placeholder="Минимум 6 символов"
-                            >
-                        </div>
-                        <div class="form-group">
-                            <label>Подтверждение пароля</label>
-                            <input 
-                                type="password" 
-                                v-model="registerForm.confirmPassword"
-                                required 
-                                placeholder="Повторите пароль"
                             >
                         </div>
                         <div v-if="registerError" class="error-message">{{ registerError }}</div>
@@ -116,7 +104,6 @@
                 </div>
             </div>
         </div>
-    </header>
 </template>
 
 <script>
@@ -140,8 +127,7 @@ export default {
             registerForm: {
                 name: '',
                 phone: '',
-                password: '',
-                confirmPassword: ''
+                password: ''
             }
         }
     },
@@ -164,7 +150,7 @@ export default {
             this.loading = true;
             
             try {
-                const response = await fetch(`${API_BASE_URL}/login`, {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json'
@@ -178,7 +164,9 @@ export default {
                 const data = await response.json();
                 
                 if (response.ok) {
-                    localStorage.setItem('auth_token', data.token);
+                    // Сохраняем токен и данные пользователя
+                    localStorage.setItem('auth_token', data.access_token);
+                    localStorage.setItem('token_type', data.token_type);
                     localStorage.setItem('user_data', JSON.stringify(data.user));
                     
                     this.isAuthenticated = true;
@@ -188,7 +176,7 @@ export default {
                     
                     this.$emit('user-logged-in', data.user);
                 } else {
-                    this.loginError = data.message || 'Ошибка входа';
+                    this.loginError = data.detail || 'Ошибка входа';
                 }
             } catch (error) {
                 console.error('Ошибка:', error);
@@ -200,21 +188,10 @@ export default {
         
         async handleRegister() {
             this.registerError = '';
-            
-            if (this.registerForm.password.length < 6) {
-                this.registerError = 'Пароль должен содержать минимум 6 символов';
-                return;
-            }
-            
-            if (this.registerForm.password !== this.registerForm.confirmPassword) {
-                this.registerError = 'Пароли не совпадают';
-                return;
-            }
-            
             this.loading = true;
             
             try {
-                const response = await fetch(`${API_BASE_URL}/register`, {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json'
@@ -229,7 +206,9 @@ export default {
                 const data = await response.json();
                 
                 if (response.ok) {
-                    localStorage.setItem('auth_token', data.token);
+                    // Сохраняем токен и данные пользователя
+                    localStorage.setItem('auth_token', data.access_token);
+                    localStorage.setItem('token_type', data.token_type);
                     localStorage.setItem('user_data', JSON.stringify(data.user));
                     
                     this.isAuthenticated = true;
@@ -238,13 +217,14 @@ export default {
                     this.registerForm = {
                         name: '',
                         phone: '',
-                        password: '',
-                        confirmPassword: ''
+                        password: ''
                     };
                     
                     this.$emit('user-registered', data.user);
+                } else if (response.status === 409) {
+                    this.registerError = data.detail || 'Пользователь с таким номером уже существует';
                 } else {
-                    this.registerError = data.message || 'Ошибка регистрации';
+                    this.registerError = data.detail || 'Ошибка регистрации';
                 }
             } catch (error) {
                 console.error('Ошибка:', error);
@@ -256,6 +236,7 @@ export default {
         
         logout() {
             localStorage.removeItem('auth_token');
+            localStorage.removeItem('token_type');
             localStorage.removeItem('user_data');
             this.isAuthenticated = false;
             this.userName = '';
@@ -271,8 +252,7 @@ export default {
             this.registerForm = {
                 name: '',
                 phone: '',
-                password: '',
-                confirmPassword: ''
+                password: ''
             };
         },
         
@@ -375,6 +355,8 @@ export default {
     position: fixed;
     top: 0;
     left: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.8);
