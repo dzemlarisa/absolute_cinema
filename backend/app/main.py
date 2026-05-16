@@ -120,9 +120,19 @@ class SessionCreate(SessionBase):
 
 class SessionResponse(SessionBase):
     id: int
+    start_time: datetime
+    end_time: datetime
     remaining_seats: int
     class Config:
         from_attributes = True
+
+    @classmethod
+    def from_orm(cls, session):
+        return cls(
+            id=session.id,
+            start_time=session.start_time.strftime('%Y-%m-%d %H:%M'),
+            end_time=session.end_time.strftime('%Y-%m-%d %H:%M')
+        )
 
 class TicketBase(BaseModel):
     session_id: int

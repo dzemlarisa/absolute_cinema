@@ -84,8 +84,8 @@ class Session(Base):
     cinema_id = Column(Integer, ForeignKey('cinemas.id', ondelete='CASCADE'), nullable=False)
     hall_id = Column(Integer, ForeignKey('halls.id', ondelete='CASCADE'), nullable=False)
     movie_id = Column(Integer, ForeignKey('movies.id', ondelete='CASCADE'), nullable=False)
-    start_time = Column(String(50), nullable=False)
-    end_time = Column(String(50), nullable=False)
+    start_time = Column(DateTime, nullable=False)
+    end_time = Column(DateTime, nullable=False)
     remaining_seats = Column(Integer, nullable=False)
     
     cinema = relationship('Cinema', back_populates='sessions')
