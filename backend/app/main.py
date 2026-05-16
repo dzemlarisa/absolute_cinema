@@ -364,7 +364,6 @@ async def get_movies(
     genre: Optional[str] = Query(None, description="Фильтр по жанру"),
     director: Optional[str] = Query(None, description="Фильтр по режиссёру"),
     year: Optional[int] = Query(None, description="Фильтр по году выпуска"),
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Возвращает список всех фильмов с возможностью фильтрации по жанру, режиссёру, году"""
@@ -482,7 +481,6 @@ async def get_directors(
 #эндпоинты для кинотеатров
 @app.get("/cinemas", response_model=List[CinemaResponse])
 async def get_cinemas(
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Возвращает список кинотеатров"""
@@ -559,7 +557,6 @@ async def delete_cinema(
 @app.get("/cinemas/{cinema_id}/halls", response_model=List[HallResponse])
 async def get_cinema_halls(
     cinema_id: int,
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Возвращает список залов конкретного кинотеатра"""
@@ -624,7 +621,6 @@ async def get_sessions(
     movie_id: Optional[int] = Query(None, description="Фильтр по ID фильма"),
     cinema_id: Optional[int] = Query(None, description="Фильтр по ID кинотеатра"),
     date: Optional[str] = Query(None, description="Фильтр по дате (YYYY-MM-DD)"),
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Возвращает список сеансов с возможностью фильтрации"""

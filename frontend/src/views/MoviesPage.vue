@@ -33,21 +33,16 @@
                 </div>
 
                 <div v-else-if="filteredMovies.length === 0" class="no-results">
-                    <i class="fas fa-film"></i>
                     <p>Фильмы не найдены</p>
                 </div>
 
                 <div v-else class="movies-grid">
                     <div v-for="movie in filteredMovies" :key="movie.id" class="movie-card">
-                        <div class="movie-poster">
-                            <img :src="movie.poster || 'https://via.placeholder.com/300x450?text=No+Poster'" :alt="movie.name">
-                            <div class="rating" v-if="movie.rating">{{ movie.rating }}</div>
-                        </div>
                         <div class="movie-info">
                             <h3>{{ movie.name }}</h3>
                             <div class="movie-meta">
-                                <span><i class="fas fa-clock"></i> {{ movie.time }}</span>
-                                <span><i class="fas fa-tag"></i> {{ movie.genre }}</span>
+                                <span>{{ movie.time }} мин</span>
+                                <span>{{ movie.genre }}</span>
                             </div>
                             <div class="movie-details">
                                 <p><strong>Режиссёр:</strong> {{ movie.director }}</p>
@@ -121,8 +116,13 @@ export default {
 }
 
 .hero h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: #b9b9c3;
 }
 
 .movies-section {

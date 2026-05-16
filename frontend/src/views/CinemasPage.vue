@@ -14,25 +14,17 @@
                 </div>
 
                 <div v-else-if="cinemas.length === 0" class="no-results">
-                    <i class="fas fa-building"></i>
                     <p>Кинотеатры не найдены</p>
                 </div>
 
                 <div v-else class="cinemas-list">
                     <div v-for="cinema in cinemas" :key="cinema.id" class="cinema-card">
-                        <div class="cinema-image">
-                            <img :src="cinema.image || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800'" :alt="cinema.name">
-                        </div>
                         <div class="cinema-info">
                             <h3>{{ cinema.name }}</h3>
                             <div class="cinema-address">
                                 <i class="fas fa-map-marker-alt"></i> {{ cinema.address }}
                             </div>
-                            <div class="cinema-features">
-                                <span v-for="(feature, idx) in getCinemaFeatures(cinema)" :key="idx">
-                                    <i :class="feature.icon"></i> {{ feature.text }}
-                                </span>
-                            </div>
+
                             <div class="halls-info" v-if="halls[cinema.id]">
                                 <h4>Залы:</h4>
                                 <div class="halls-list">
@@ -107,6 +99,16 @@ export default {
     background: linear-gradient(135deg, #1e1e2a 0%, #0b0b10 100%);
     padding: 3rem 0;
     text-align: center;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: #b9b9c3;
 }
 
 .cinemas-section {

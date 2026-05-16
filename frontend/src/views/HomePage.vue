@@ -9,22 +9,20 @@
 
         <section class="movies-preview">
             <div class="container">
-                <h2>Сейчас в прокате</h2>
+                <h2>Новинки кино</h2>
                 <div v-if="loadingMovies" class="loading">
-                    <i class="fas fa-spinner fa-pulse"></i> Загрузка фильмов...
+                    <i class="fas fa-spinner fa-pulse"></i> Загрузка новинок...
                 </div>
-                <div v-else-if="movies.length === 0" class="no-results">
-                    <i class="fas fa-film"></i>
-                    <p>Фильмы не найдены</p>
+                <div v-else-if="newMovies.length === 0" class="no-results">
+                    <p>Новинки не найдены</p>
                 </div>
                 <div v-else class="movies-grid">
-                    <div v-for="movie in movies.slice(0, 4)" :key="movie.id" class="movie-card">
-
+                    <div v-for="movie in newMovies" :key="movie.id" class="movie-card">
                         <div class="movie-info">
                             <h3>{{ movie.name }}</h3>
                             <div class="movie-meta">
-                                <span><i class="fas fa-clock"></i> {{ movie.time }}</span>
-                                <span><i class="fas fa-tag"></i> {{ movie.genre }}</span>
+                                <span>{{ movie.time }} мин</span>
+                                <span>{{ movie.genre }}</span>
                             </div>
                             <button class="btn-buy" @click="buyTicket(movie.id)">Купить билет</button>
                         </div>
@@ -33,18 +31,23 @@
             </div>
         </section>
 
-        <section class="features">
+        <section class="about-section">
             <div class="container">
-                <div class="features-grid">
-                    <div class="feature-item">
-                        <i class="fas fa-ticket-alt"></i>
-                        <h3>Без комиссии</h3>
-                        <p>Цена билета как в кассе кинотеатра</p>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-headset"></i>
-                        <h3>Поддержка 24/7</h3>
-                        <p>Поможем с любым вопросом</p>
+                <div class="about-content">
+                    <h2>О нас</h2>
+                    <div class="about-grid">
+                        <div class="about-card">
+                            <h3>Список фильмов</h3>
+                            <p>Просматривайте актуальную программу кинотеатров, изучайте описания, жанры и продолжительность фильмов.</p>
+                        </div>
+                        <div class="about-card">
+                            <h3>Кинотеатры города</h3>
+                            <p>Узнавайте адреса, контакты и расписание сеансов всех кинотеатров вашего города.</p>
+                        </div>
+                        <div class="about-card">
+                            <h3>Покупка билетов</h3>
+                            <p>Выбирайте удобные места, бронируйте и оплачивайте билеты онлайн без комиссии.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -61,6 +64,17 @@ export default {
         return {
             movies: [],
             loadingMovies: true
+        }
+    },
+    computed: {
+        // Берем последние 3 фильма (новинки) на основе id или даты добавления
+        newMovies() {
+            // Предполагаем, что фильмы приходят с сервера отсортированными по дате добавления
+            // Если нет, сортируем по id в обратном порядке (новые имеют больший id)
+            const sortedMovies = [...this.movies].sort((a, b) => {
+                return b.id - a.id
+            })
+            return sortedMovies.slice(0, 3)
         }
     },
     async mounted() {
@@ -119,8 +133,9 @@ export default {
 
 .movies-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(3, minmax(260px, 1fr));
     gap: 2rem;
+    margin: 0 auto; 
 }
 
 .movie-card {
@@ -135,36 +150,6 @@ export default {
     transform: translateY(-5px);
     border-color: #f5c518;
     box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.5);
-}
-
-.movie-poster {
-    position: relative;
-    height: 340px;
-    overflow: hidden;
-}
-
-.movie-poster img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s;
-}
-
-.movie-card:hover .movie-poster img {
-    transform: scale(1.05);
-}
-
-.rating {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
-    padding: 4px 10px;
-    border-radius: 30px;
-    font-weight: 700;
-    color: #f5c518;
-    font-size: 0.9rem;
 }
 
 .movie-info {
@@ -185,10 +170,23 @@ export default {
     font-size: 0.75rem;
     color: #a1a1aa;
     margin-bottom: 1rem;
+    flex-wrap: wrap;
 }
 
 .movie-meta i {
     margin-right: 4px;
+}
+
+.new-badge {
+    background: linear-gradient(135deg, #f5c518, #ff8c00);
+    padding: 2px 8px;
+    border-radius: 20px;
+    color: #121212;
+    font-weight: bold;
+}
+
+.new-badge i {
+    color: #121212;
 }
 
 .btn-buy {
@@ -210,33 +208,6 @@ export default {
     box-shadow: 0 4px 12px rgba(245, 197, 24, 0.3);
 }
 
-.features {
-    padding: 4rem 0;
-    background: #121216;
-}
-
-.features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    text-align: center;
-}
-
-.feature-item i {
-    font-size: 2.5rem;
-    color: #f5c518;
-    margin-bottom: 1rem;
-}
-
-.feature-item h3 {
-    margin-bottom: 0.5rem;
-}
-
-.feature-item p {
-    color: #9f9faa;
-    font-size: 0.9rem;
-}
-
 .loading, .no-results {
     text-align: center;
     padding: 3rem;
@@ -248,4 +219,56 @@ export default {
     margin-bottom: 1rem;
     color: #f5c518;
 }
+
+/* Стили для раздела "О нас" */
+.about-section {
+    background: #0f0f13;
+    padding: 4rem 0;
+    border-top: 1px solid #2c2c30;
+}
+
+.about-content h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.about-card {
+    background: #18181e;
+    border-radius: 24px;
+    padding: 2rem;
+    text-align: center;
+    transition: transform 0.25s ease, box-shadow 0.25s;
+    border: 1px solid #2c2c30;
+}
+
+.about-card:hover {
+    transform: translateY(-5px);
+    border-color: #f5c518;
+    box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.5);
+}
+
+.about-card i {
+    font-size: 3rem;
+    color: #f5c518;
+    margin-bottom: 1rem;
+}
+
+.about-card h3 {
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.about-card p {
+    color: #a1a1aa;
+    line-height: 1.5;
+}
+
 </style>

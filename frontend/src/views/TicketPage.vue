@@ -16,7 +16,6 @@
                         <div v-for="movie in movies" :key="movie.id" 
                              :class="['movie-option', { selected: selectedMovie?.id === movie.id }]"
                              @click="selectMovie(movie)">
-                            <img :src="movie.poster || 'https://via.placeholder.com/80x120'" :alt="movie.name">
                             <div class="movie-option-info">
                                 <h3>{{ movie.name }}</h3>
                                 <p>{{ movie.genre }} • {{ movie.time }}</p>
@@ -248,6 +247,16 @@ export default {
 
 .booking-section {
     padding: 2rem 0 4rem;
+}
+
+.hero h1{
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: #b9b9c3;
 }
 
 .container {
