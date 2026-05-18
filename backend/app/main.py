@@ -788,7 +788,6 @@ async def get_ticket(
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if not ticket:
         raise HTTPException(status_code=404, detail="Билет не найден")
-
     if ticket.user_id != current_user.id and current_user.role.name != "admin":
         raise HTTPException(status_code=403, detail="Доступ запрещён")
     

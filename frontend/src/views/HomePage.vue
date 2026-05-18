@@ -67,10 +67,7 @@ export default {
         }
     },
     computed: {
-        // Берем последние 3 фильма (новинки) на основе id или даты добавления
         newMovies() {
-            // Предполагаем, что фильмы приходят с сервера отсортированными по дате добавления
-            // Если нет, сортируем по id в обратном порядке (новые имеют больший id)
             const sortedMovies = [...this.movies].sort((a, b) => {
                 return b.id - a.id
             })
@@ -177,18 +174,6 @@ export default {
     margin-right: 4px;
 }
 
-.new-badge {
-    background: linear-gradient(135deg, #f5c518, #ff8c00);
-    padding: 2px 8px;
-    border-radius: 20px;
-    color: #121212;
-    font-weight: bold;
-}
-
-.new-badge i {
-    color: #121212;
-}
-
 .btn-buy {
     background: #f5c518;
     border: none;
@@ -220,7 +205,6 @@ export default {
     color: #f5c518;
 }
 
-/* Стили для раздела "О нас" */
 .about-section {
     background: #0f0f13;
     padding: 4rem 0;
