@@ -147,7 +147,6 @@ class TicketResponse(BaseModel):
     session_id: int
     ticket_cnt: int
     total: float
-    status: str
     class Config:
         from_attributes = True
 
@@ -769,3 +768,86 @@ async def get_cinema_sessions(
         raise HTTPException(status_code=404, detail="Кинотеатр не найден")
     
     return db.query(SessionModel).filter(SessionModel.cinema_id == cinema_id).all()
+
+#эндпоинты для билетов
+@app.get("/tickets", response_model=List[TicketResponse])
+async def get_user_tickets(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Возвращает историю билетов текущего пользователя"""
+    return db.query(Ticket).filter(Ticket.user_id == current_user.id).all()
+
+@app.get("/tickets/{ticket_id}", response_model=TicketResponse)
+async def get_ticket(
+    ticket_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Возвращает информацию о конкретном билете"""
+    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Билет не найден")
+
+    if ticket.user_id != current_user.id and current_user.role.name != "admin":
+        raise HTTPException(status_code=403, detail="Доступ запрещён")
+    
+    return ticket
+
+@app.post("/tickets", response_model=TicketResponse)
+async def create_ticket(
+    ticket_data: TicketCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Создаёт покупку билетов"""
+    session = db.query(SessionModel).filter(SessionModel.id == ticket_data.session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Сеанс не найден")
+    
+    if session.remaining_seats < ticket_data.ticket_cnt:
+        raise HTTPException(status_code=400, detail="Недостаточно свободных мест")
+    
+    movie = db.query(Movie).filter(Movie.id == session.movie_id).first()
+    total_price = movie.price * ticket_data.ticket_cnt
+    
+    new_ticket = Ticket(
+        user_id=current_user.id,
+        session_id=ticket_data.session_id,
+        ticket_cnt=ticket_data.ticket_cnt,
+        total=total_price
+    )
+    
+    session.remaining_seats -= ticket_data.ticket_cnt
+    
+    db.add(new_ticket)
+    db.commit()
+    db.refresh(new_ticket)
+    
+    return new_ticket
+
+@app.delete("/tickets/{ticket_id}")
+async def cancel_ticket(
+    ticket_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Отменяет покупку билетов, если сеанс ещё не начался"""
+    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Билет не найден")
+    
+    if ticket.user_id != current_user.id and current_user.role.name != "admin":
+        raise HTTPException(status_code=403, detail="Доступ запрещён")
+    
+    session = db.query(SessionModel).filter(SessionModel.id == ticket.session_id).first()
+    
+    if session.start_time <= (datetime.now() + timedelta(hours=3)):
+        raise HTTPException(status_code=400, detail="Нельзя отменить билет на уже начавшийся сеанс")
+
+    session.remaining_seats += ticket.ticket_cnt
+    
+    db.delete(ticket)
+    db.commit()
+    
+    return {"message": "Билет успешно отменён"}
