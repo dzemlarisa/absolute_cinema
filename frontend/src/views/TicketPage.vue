@@ -110,7 +110,7 @@
                     <div class="success-message">
                         <i class="fas fa-check-circle"></i>
                         <h2>Билет успешно приобретён!</h2>
-                        <button class="btn-new" @click="resetBooking">Купить ещё билет</button>
+                        <button class="btn-new" @click="resetBooking">На главную</button>
                     </div>
                 </div>
             </div>
@@ -226,6 +226,7 @@ export default {
             this.selectedCinema = null
             this.selectedSession = null
             this.ticketCount = 1
+            this.$router.push('/')
         }
     }
 }
