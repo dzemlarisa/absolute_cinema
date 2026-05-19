@@ -605,6 +605,47 @@ async def create_hall(
     db.refresh(new_hall)
     return new_hall
 
+@app.put("/halls/{hall_id}", response_model=HallResponse)
+async def update_hall(
+    hall_id: int,
+    hall_data: HallCreate,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Обновляет информацию о зале"""
+    hall = db.query(Hall).filter(Hall.id == hall_id).first()
+    if not hall:
+        raise HTTPException(status_code=404, detail="Зал не найден")
+    
+    if hall.cinema_id != hall_data.cinema_id:
+        raise HTTPException(status_code=400, detail="Нельзя изменить принадлежность зала к кинотеатру")
+
+    cinema = db.query(Cinema).filter(Cinema.id == hall.cinema_id).first()
+    if not cinema:
+        raise HTTPException(status_code=404, detail="Кинотеатр не найден")
+    
+    if hall_data.capacity < hall.capacity:
+        active_sessions = db.query(SessionModel).filter(
+            and_(
+                SessionModel.hall_id == hall_id,
+                SessionModel.start_time > datetime.now()
+            )
+        ).all()
+        
+        for session in active_sessions:
+            if session.remaining_seats > hall_data.capacity:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Невозможно уменьшить вместимость зала, так как есть сеанс #{session.id} с {session.remaining_seats} проданными местами"
+                )
+
+    for key, value in hall_data.model_dump(exclude_unset=True).items():
+        setattr(hall, key, value)
+    
+    db.commit()
+    db.refresh(hall)
+    return hall
+
 @app.delete("/halls/{hall_id}")
 async def delete_hall(
     hall_id: int,

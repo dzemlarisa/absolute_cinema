@@ -92,11 +92,15 @@ def test_create_session(db_session):
     db_session.add_all([cinema, hall, movie])
     db_session.commit()
     
+    start_time = datetime(2026, 6, 18, 17, 0)
+    end_time = start_time + timedelta(minutes=int(movie.time))
     session = Session(
         cinema_id=cinema.id,
         hall_id=hall.id,
         movie_id=movie.id,
-        start_time = datetime(2026, 6, 18, 17, 0)
+        start_time = start_time,
+        end_time=end_time,
+        remaining_seats=hall.capacity
     )
     db_session.add(session)
     db_session.commit()
