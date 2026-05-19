@@ -328,27 +328,34 @@ def login(
         }
     )
     
+    role = db.query(Role).filter(Role.id == user.role_id).first()
+    
     return {
         "access_token": access_token,
         "token_type": "bearer",
         "user": {
-            "phone": user.phone,
+            "id": user.id,
             "name": user.name,
-			"role_id": user.role_id
+            "phone": user.phone,
+            "role": role.name if role else "Гость"  
         }
     }
 
-@app.get("/auth/me", response_model=UserResponse)
+@app.get("/auth/me")
 def get_current_user_info(
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """
     Получить информацию о текущем пользователе
     """
+    role = db.query(Role).filter(Role.id == current_user.role_id).first()
+    
     return {
+        "id": current_user.id,
         "phone": current_user.phone,
         "name": current_user.name,
-        "role_id": current_user.role_id
+        "role": role.name if role else "Гость"
     }
 
 @app.post("/auth/logout")

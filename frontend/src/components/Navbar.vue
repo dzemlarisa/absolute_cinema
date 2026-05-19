@@ -1,4 +1,3 @@
-//navbar
 <template>
     <header class="navbar">
         <div class="container">
@@ -9,11 +8,15 @@
                 <router-link to="/" class="nav-link">Главная</router-link>
                 <router-link to="/movies" class="nav-link">Фильмы</router-link>
                 <router-link to="/cinemas" class="nav-link">Кинотеатры</router-link>
+                <router-link to="/sessions" class="nav-link">Сеансы</router-link>
                 <router-link to="/ticket" class="nav-link">Купить билет</router-link>
             </nav>
             <div class="auth-buttons">
-                <button v-if="!isAuthenticated" class="btn-auth" @click="showLoginModal = true">Вход</button>
+                <button v-if="!isAuthenticated" class="btn-auth" @click="showLoginModal = true">
+                    <i class="fas fa-user-circle"></i> Вход
+                </button>
                 <div v-else class="user-menu">
+                    <span v-if="isAdmin" class="admin-badge">Администратор</span>
                     <span class="user-name">{{ userName }}</span>
                     <button class="btn-auth" @click="logout">Выйти</button>
                 </div>
@@ -21,94 +24,73 @@
         </div>
     </header>
 
-    <div v-if="showLoginModal" class="modal" @click.self="closeModals">
-            <div class="modal-content">
-                <span class="close-modal" @click="closeModals">&times;</span>
-                <div class="modal-header">
-                    <h2>Вход в аккаунт</h2>
-                </div>
-                <div class="modal-body">
-                    <form @submit.prevent="handleLogin">
-                        <div class="form-group">
-                            <label>Телефон</label>
-                            <input 
-                                type="tel" 
-                                v-model="loginForm.phone"
-                                required 
-                                placeholder="89991234567"
-                            >
-                        </div>
-                        <div class="form-group">
-                            <label>Пароль</label>
-                            <input 
-                                type="password" 
-                                v-model="loginForm.password"
-                                placeholder="••••••••" 
-                                required
-                            >
-                        </div>
-                        <div v-if="loginError" class="error-message">{{ loginError }}</div>
-                        <button type="submit" class="btn-auth-submit" :disabled="loading">
-                            {{ loading ? 'Вход...' : 'Войти' }}
-                        </button>
-                        <p class="auth-switch">
-                            Нет аккаунта? 
-                            <a href="#" @click.prevent="switchToRegister">Зарегистрироваться</a>
-                        </p>
-                    </form>
-                </div>
+    <!-- Модальное окно входа -->
+    <div v-if="showLoginModal" class="modal-overlay" @click.self="closeModals">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Вход в аккаунт</h2>
+                <button class="modal-close" @click="closeModals">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form @submit.prevent="handleLogin">
+                    <div class="form-group">
+                        <label>Телефон</label>
+                        <input type="tel" v-model="loginForm.phone" placeholder="89991234567" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Пароль</label>
+                        <input type="password" v-model="loginForm.password" placeholder="••••••••" required>
+                    </div>
+                    <div v-if="loginError" class="error-message">{{ loginError }}</div>
+                    <button type="submit" class="btn-submit" :disabled="loading">
+                        {{ loading ? 'Вход...' : 'Войти' }}
+                    </button>
+                    <p class="auth-switch">
+                        Нет аккаунта? 
+                        <a href="#" @click.prevent="switchToRegister">Зарегистрироваться</a>
+                    </p>
+                </form>
             </div>
         </div>
+    </div>
 
-        <div v-if="showRegisterModal" class="modal" @click.self="closeModals">
-            <div class="modal-content">
-                <span class="close-modal" @click="closeModals">&times;</span>
-                <div class="modal-header">
-                    <h2>Регистрация</h2>
-                </div>
-                <div class="modal-body">
-                    <form @submit.prevent="handleRegister">
-                        <div class="form-group">
-                            <label>Имя</label>
-                            <input 
-                                type="text" 
-                                v-model="registerForm.name"
-                                required
-                            >
-                        </div>
-                        <div class="form-group">
-                            <label>Номер телефона</label>
-                            <input 
-                                type="tel" 
-                                v-model="registerForm.phone"
-                                required 
-                                placeholder="89991234567"
-                            >
-                        </div>
-                        <div class="form-group">
-                            <label>Пароль</label>
-                            <input 
-                                type="password" 
-                                v-model="registerForm.password"
-                                required 
-                            >
-                        </div>
-                        <div v-if="registerError" class="error-message">{{ registerError }}</div>
-                        <button type="submit" class="btn-auth-submit" :disabled="loading">
-                            {{ loading ? 'Регистрация...' : 'Зарегистрироваться' }}
-                        </button>
-                        <p class="auth-switch">
-                            Уже есть аккаунт? 
-                            <a href="#" @click.prevent="switchToLogin">Войти</a>
-                        </p>
-                    </form>
-                </div>
+    <!-- Модальное окно регистрации -->
+    <div v-if="showRegisterModal" class="modal-overlay" @click.self="closeModals">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Регистрация</h2>
+                <button class="modal-close" @click="closeModals">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form @submit.prevent="handleRegister">
+                    <div class="form-group">
+                        <label>Имя</label>
+                        <input type="text" v-model="registerForm.name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Номер телефона</label>
+                        <input type="tel" v-model="registerForm.phone" placeholder="89991234567" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Пароль</label>
+                        <input type="password" v-model="registerForm.password" required>
+                    </div>
+                    <div v-if="registerError" class="error-message">{{ registerError }}</div>
+                    <button type="submit" class="btn-submit" :disabled="loading">
+                        {{ loading ? 'Регистрация...' : 'Зарегистрироваться' }}
+                    </button>
+                    <p class="auth-switch">
+                        Уже есть аккаунт? 
+                        <a href="#" @click.prevent="switchToLogin">Войти</a>
+                    </p>
+                </form>
             </div>
         </div>
+    </div>
 </template>
 
 <script>
-const API_BASE_URL = 'http://localhost:8001';
+import { cinemaApi } from '../api/cinemaApi'
 
 export default {
     name: 'Navbar',
@@ -118,18 +100,12 @@ export default {
             showRegisterModal: false,
             isAuthenticated: false,
             userName: '',
+            isAdmin: false,
             loading: false,
             loginError: '',
             registerError: '',
-            loginForm: {
-                phone: '',
-                password: ''
-            },
-            registerForm: {
-                name: '',
-                phone: '',
-                password: ''
-            }
+            loginForm: { phone: '', password: '' },
+            registerForm: { name: '', phone: '', password: '' }
         }
     },
     mounted() {
@@ -142,126 +118,71 @@ export default {
             
             if (token && user) {
                 this.isAuthenticated = true;
-                this.userName = JSON.parse(user).name;
+                const userData = JSON.parse(user);
+                this.userName = userData.name;
+                this.isAdmin = userData.role === 'Админ';
             }
         },
-        
         async handleLogin() {
             this.loginError = '';
             this.loading = true;
-            
             try {
-                const response = await fetch(`${API_BASE_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        phone: this.loginForm.phone,
-                        password: this.loginForm.password
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    // Сохраняем токен и данные пользователя
-                    localStorage.setItem('auth_token', data.access_token);
-                    localStorage.setItem('token_type', data.token_type);
-                    localStorage.setItem('user_data', JSON.stringify(data.user));
-                    
-                    this.isAuthenticated = true;
-                    this.userName = data.user.name;
-                    this.closeModals();
-                    this.loginForm = { phone: '', password: '' };
-                    
-                    this.$emit('user-logged-in', data.user);
-                } else {
-                    this.loginError = data.detail || 'Ошибка входа';
-                }
+                const data = await cinemaApi.login(this.loginForm.phone, this.loginForm.password);
+                this.isAuthenticated = true;
+                this.userName = data.user.name;
+                this.isAdmin = data.user.role === 'Админ';
+                this.closeModals();
+                this.loginForm = { phone: '', password: '' };
+                this.$emit('user-logged-in', data.user);
+                window.location.reload();
             } catch (error) {
-                console.error('Ошибка:', error);
-                this.loginError = 'Не удалось соединиться с сервером';
+                this.loginError = error.message;
             } finally {
                 this.loading = false;
             }
         },
-        
         async handleRegister() {
             this.registerError = '';
             this.loading = true;
-            
             try {
-                const response = await fetch(`${API_BASE_URL}/auth/register`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name: this.registerForm.name,
-                        phone: this.registerForm.phone,
-                        password: this.registerForm.password
-                    })
+                const data = await cinemaApi.register({
+                    name: this.registerForm.name,
+                    phone: this.registerForm.phone,
+                    password: this.registerForm.password
                 });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    // Сохраняем токен и данные пользователя
-                    localStorage.setItem('auth_token', data.access_token);
-                    localStorage.setItem('token_type', data.token_type);
-                    localStorage.setItem('user_data', JSON.stringify(data.user));
-                    
-                    this.isAuthenticated = true;
-                    this.userName = data.user.name;
-                    this.closeModals();
-                    this.registerForm = {
-                        name: '',
-                        phone: '',
-                        password: ''
-                    };
-                    
-                    this.$emit('user-registered', data.user);
-                } else if (response.status === 409) {
-                    this.registerError = data.detail || 'Пользователь с таким номером уже существует';
-                } else {
-                    this.registerError = data.detail || 'Ошибка регистрации';
-                }
+                this.isAuthenticated = true;
+                this.userName = data.user.name;
+                this.isAdmin = false;
+                this.closeModals();
+                this.registerForm = { name: '', phone: '', password: '' };
+                this.$emit('user-registered', data.user);
+                window.location.reload();
             } catch (error) {
-                console.error('Ошибка:', error);
-                this.registerError = 'Не удалось соединиться с сервером';
+                this.registerError = error.message;
             } finally {
                 this.loading = false;
             }
         },
-        
         logout() {
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('token_type');
-            localStorage.removeItem('user_data');
+            cinemaApi.logout();
             this.isAuthenticated = false;
             this.userName = '';
+            this.isAdmin = false;
             this.$emit('user-logged-out');
+            window.location.reload();
         },
-        
         closeModals() {
             this.showLoginModal = false;
             this.showRegisterModal = false;
             this.loginError = '';
             this.registerError = '';
             this.loginForm = { phone: '', password: '' };
-            this.registerForm = {
-                name: '',
-                phone: '',
-                password: ''
-            };
+            this.registerForm = { name: '', phone: '', password: '' };
         },
-        
         switchToRegister() {
             this.showLoginModal = false;
             this.showRegisterModal = true;
         },
-        
         switchToLogin() {
             this.showRegisterModal = false;
             this.showLoginModal = true;
@@ -282,7 +203,8 @@ export default {
 }
 
 .container {
-    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -294,13 +216,11 @@ export default {
     font-weight: 700;
     color: #f5c518;
     text-decoration: none;
-    white-space: nowrap;
 }
 
 .nav-links {
     display: flex;
     gap: 2rem;
-    margin-left: 2rem;
 }
 
 .nav-link {
@@ -310,17 +230,12 @@ export default {
     transition: 0.2s;
     padding: 0.5rem 0;
     border-bottom: 2px solid transparent;
-    white-space: nowrap;
 }
 
 .nav-link:hover, 
 .nav-link.router-link-active {
     color: #f5c518;
     border-bottom-color: #f5c518;
-}
-
-.auth-buttons {
-    margin-left: auto;
 }
 
 .btn-auth {
@@ -333,7 +248,9 @@ export default {
     cursor: pointer;
     transition: all 0.2s;
     font-size: 0.9rem;
-    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .btn-auth:hover {
@@ -348,75 +265,78 @@ export default {
 }
 
 .user-name {
-    color: #f5c518;
+    color: #e2e2e8;
     font-weight: 500;
 }
 
-.modal {
+.admin-badge {
+    background: #f5c518;
+    color: #121212;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+/* Модальные окна - центрированные */
+.modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    width: 100%;
-    height: 100%;
     background: rgba(0, 0, 0, 0.8);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    animation: fadeIn 0.3s ease;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.modal-content {
+.modal-container {
     background: #1e1e24;
     border-radius: 16px;
     width: 90%;
     max-width: 450px;
-    position: relative;
-    animation: slideIn 0.3s ease;
     border: 1px solid #2a2a2e;
+    animation: fadeIn 0.2s ease;
 }
 
-@keyframes slideIn {
+@keyframes fadeIn {
     from {
-        transform: translateY(-50px);
         opacity: 0;
+        transform: scale(0.95);
     }
     to {
-        transform: translateY(0);
         opacity: 1;
+        transform: scale(1);
     }
-}
-
-.close-modal {
-    position: absolute;
-    right: 20px;
-    top: 15px;
-    font-size: 28px;
-    cursor: pointer;
-    color: #888;
-    transition: 0.2s;
-}
-
-.close-modal:hover {
-    color: #f5c518;
 }
 
 .modal-header {
     padding: 20px 24px;
     border-bottom: 1px solid #2a2a2e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .modal-header h2 {
     margin: 0;
     color: #f5c518;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #888;
+    transition: 0.2s;
+}
+
+.modal-close:hover {
+    color: #f5c518;
 }
 
 .modal-body {
@@ -442,7 +362,6 @@ export default {
     border-radius: 8px;
     color: white;
     font-size: 1rem;
-    transition: 0.2s;
 }
 
 .form-group input:focus {
@@ -450,7 +369,7 @@ export default {
     border-color: #f5c518;
 }
 
-.btn-auth-submit {
+.btn-submit {
     width: 100%;
     padding: 12px;
     background: #f5c518;
@@ -463,29 +382,13 @@ export default {
     transition: 0.2s;
 }
 
-.btn-auth-submit:hover:not(:disabled) {
+.btn-submit:hover:not(:disabled) {
     background: #e0b414;
-    transform: translateY(-1px);
 }
 
-.btn-auth-submit:disabled {
+.btn-submit:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-}
-
-.auth-switch {
-    text-align: center;
-    margin-top: 20px;
-    color: #888;
-}
-
-.auth-switch a {
-    color: #f5c518;
-    text-decoration: none;
-}
-
-.auth-switch a:hover {
-    text-decoration: underline;
 }
 
 .error-message {
@@ -499,19 +402,26 @@ export default {
     text-align: center;
 }
 
+.auth-switch {
+    text-align: center;
+    margin-top: 20px;
+    color: #888;
+}
+
+.auth-switch a {
+    color: #f5c518;
+    text-decoration: none;
+}
+
 @media (max-width: 768px) {
     .container {
         flex-direction: column;
         gap: 1rem;
     }
-    
-    .auth-buttons {
-        margin-left: 0;
-    }
-    
     .nav-links {
-        margin-left: 0;
-        gap: 1.5rem;
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }
 </style>
