@@ -1,6 +1,19 @@
 const API_BASE_URL = 'http://localhost:8001'
 
 export const cinemaApi = {
+    async checkConnection() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/movies`, {
+                method: 'GET',
+                headers: this.getAuthHeaders()
+            });
+            console.log('Connection check:', response.status);
+            return response.ok;
+        } catch (error) {
+            console.error('Connection failed:', error);
+            return false;
+        }
+    },
     async register(userData) {
         const response = await fetch(`${API_BASE_URL}/auth/register`, {
             method: 'POST',
@@ -49,7 +62,6 @@ export const cinemaApi = {
         return response.json()
     },
 
-    // Обновите метод login, чтобы он сохранял роль
     async login(phone, password) {
         const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
@@ -65,7 +77,6 @@ export const cinemaApi = {
         const data = await response.json()
         if (data.access_token) {
             localStorage.setItem('auth_token', data.access_token)
-            // Сохраняем данные пользователя с ролью
             localStorage.setItem('user_data', JSON.stringify(data.user))
         }
         return data

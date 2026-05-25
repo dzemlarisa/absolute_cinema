@@ -1,9 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Numeric, CheckConstraint
 from sqlalchemy.orm import declarative_base, relationship
-
 from datetime import datetime
 
-Base = declarative_base()
+from database import Base
 
 class Role(Base):
     __tablename__ = 'roles'

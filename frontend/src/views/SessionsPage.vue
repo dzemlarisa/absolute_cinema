@@ -237,30 +237,46 @@ export default {
             this.modalError = '';
             
             try {
-                const startTime = new Date(this.sessionForm.start_time);
-                const movie = this.movies.find(m => m.id === this.sessionForm.movie_id);
-                const duration = parseInt(movie.time) || 120;
-                const endTime = new Date(startTime.getTime() + duration * 60000);
+                const isConnected = await cinemaApi.checkConnection();
+                if (!isConnected) {
+                    throw new Error('Сервер недоступен. Проверьте, запущен ли бэкенд.');
+                }
                 
-                await cinemaApi.createSession({
-                    movie_id: this.sessionForm.movie_id,
-                    cinema_id: this.sessionForm.cinema_id,
-                    hall_id: this.sessionForm.hall_id,
-                    start_time: startTime.toISOString(),
-                    end_time: endTime.toISOString(),
-                    remaining_seats: this.availableHalls.find(h => h.id === this.sessionForm.hall_id)?.capacity || 0
-                });
+                // Преобразуем дату в нужный формат (без milliseconds и Z)
+                const startDateTime = new Date(this.sessionForm.start_time);
+                const year = startDateTime.getFullYear();
+                const month = String(startDateTime.getMonth() + 1).padStart(2, '0');
+                const day = String(startDateTime.getDate()).padStart(2, '0');
+                const hours = String(startDateTime.getHours()).padStart(2, '0');
+                const minutes = String(startDateTime.getMinutes()).padStart(2, '0');
+                
+                const formattedStartTime = `${year}-${month}-${day} ${hours}:${minutes}`;
+                
+                // Отправляем ТОЛЬКО поля, которые ожидает бэкенд
+                const sessionData = {
+                    movie_id: Number(this.sessionForm.movie_id),
+                    cinema_id: Number(this.sessionForm.cinema_id),
+                    hall_id: Number(this.sessionForm.hall_id),
+                    start_time: formattedStartTime
+                };
+                
+                console.log('Sending session data:', sessionData);
+                
+                await cinemaApi.createSession(sessionData);
                 
                 this.closeSessionModal();
                 await this.loadSessions();
+                alert('Сеанс успешно создан!');
+                
             } catch (error) {
-                this.modalError = error.message || 'Ошибка создания сеанса';
+                console.error('Ошибка:', error);
+                this.modalError = error.message || 'Ошибка при создании сеанса';
             } finally {
                 this.modalLoading = false;
             }
         },
         async deleteSession(sessionId) {
-            if (confirm('Вы уверены, что хотите удалить этот сеанс? Все связанные билеты будут удалены.')) {
+            if (confirm('Вы уверены, что хотите удалить этот сеанс? Деньги за купленные билеты будут возвращены.')) {
                 try {
                     await cinemaApi.deleteSession(sessionId);
                     await this.loadSessions();

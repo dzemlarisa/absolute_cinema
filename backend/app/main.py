@@ -2,37 +2,42 @@ import jwt
 from fastapi import FastAPI, Depends, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy import text, create_engine, and_, or_
+from sqlalchemy.orm import Session
+from sqlalchemy import text, and_, or_
 from typing import List, Optional
 from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel, validator
 from passlib.context import CryptContext
 from jwt.exceptions import PyJWTError
 import pytz
+import os
 
-from database import get_db, engine, DATABASE_URL
-from models import create_tables, Base, Role, User, Movie, Cinema, Hall, Session as SessionModel, Ticket
+# УДАЛИТЕ ЭТИ ДВЕ СТРОКИ:
+# from database import get_db, engine, DATABASE_URL, SessionLocal
+# from models import create_tables, Base, Role, User, Movie, Cinema, Hall, Session as SessionModel, Ticket
 
-engine = create_engine(
-    DATABASE_URL,
-    echo=True,
-    pool_size=5,
-    max_overflow=10,
-    pool_pre_ping=True
-)
+# Импортируем только функции, не объекты engine/SessionLocal
+from database import get_db
+from models import Base, Role, User, Movie, Cinema, Hall, Session as SessionModel, Ticket
 
-create_tables(engine)
+# Получаем engine и SessionLocal динамически
+def get_engine():
+    from database import engine
+    return engine
 
-SessionLocal = sessionmaker(bind=engine)
-db = SessionLocal()
+def get_session_local():
+    from database import SessionLocal
+    return SessionLocal
+
+TESTING = os.getenv('TESTING', 'false').lower() == 'true'
+if not TESTING:
+    Base.metadata.create_all(bind=get_engine())
 
 SECRET_KEY = "secret-keyyy" 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 security = HTTPBearer()
 
 app = FastAPI()
@@ -40,14 +45,16 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-        "http://localhost:5173", 
+        "http://localhost:5173",
+        "http://localhost:3000", 
         "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000"
     ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,
 )
 
 class MovieBase(BaseModel):
@@ -394,6 +401,24 @@ async def get_movies(
     
     return query.all()
 
+@app.get("/movies/genres")
+async def get_genres(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Возвращает список жанров"""
+    genres = db.query(Movie.genre).distinct().all()
+    return [genre[0] for genre in genres if genre[0]]
+
+@app.get("/movies/directors")
+async def get_directors(
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Возвращает список режиссёров"""
+    directors = db.query(Movie.director).distinct().all()
+    return [director[0] for director in directors if director[0]]
+
 @app.get("/movies/{movie_id}", response_model=MovieResponse)
 async def get_movie(
     movie_id: int,
@@ -473,26 +498,6 @@ async def delete_movie(
     db.delete(movie)
     db.commit()
     return {"message": "Фильм успешно удалён"}
-
-#-------------------------не работает---------------------
-@app.get("/movies/genres")
-async def get_genres(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Возвращает список жанров"""
-    genres = db.query(Movie.genre).distinct().all()
-    return [genre[0] for genre in genres if genre[0]]
-
-@app.get("/movies/directors")
-async def get_directors(
-    admin: User = Depends(get_current_admin),
-    db: Session = Depends(get_db)
-):
-    """Возвращает список режиссёров"""
-    directors = db.query(Movie.director).distinct().all()
-    return [director[0] for director in directors if director[0]]
-#--------------------------------------------------------
 
 #эндпоинты для кинотеатров
 @app.get("/cinemas", response_model=List[CinemaResponse])
@@ -780,10 +785,6 @@ async def delete_session(
     if not session:
         raise HTTPException(status_code=404, detail="Сеанс не найден")
     
-    tickets = db.query(Ticket).filter(Ticket.session_id == session_id).first()
-    if tickets:
-        raise HTTPException(status_code=400, detail="Невозможно удалить сеанс с проданными билетами")
-    
     db.delete(session)
     db.commit()
     return {"message": "Сеанс успешно удалён"}
@@ -895,3 +896,8 @@ async def cancel_ticket(
     db.commit()
     
     return {"message": "Билет успешно отменён"}
+
+if __name__ == "__main__":
+    Base.metadata.create_all(bind=get_engine())
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -13,14 +13,13 @@
         <section class="movies-section">
             <div class="container">
                 <div class="filter-bar">
-                    <div class="filter-buttons">
-                        <button :class="['filter-btn', { active: currentFilter === 'all' }]" @click="currentFilter = 'all'">
-                            Все жанры
-                        </button>
-                        <button v-for="genre in genres" :key="genre"
-                            :class="['filter-btn', { active: currentFilter === genre }]" @click="currentFilter = genre">
-                            {{ genre }}
-                        </button>
+                    <div class="filter-select-wrapper">
+                        <select v-model="currentFilter" class="filter-select" @change="onFilterChange">
+                            <option value="all">Все жанры</option>
+                            <option v-for="genre in genres" :key="genre" :value="genre">
+                                {{ genre }}
+                            </option>
+                        </select>
                     </div>
                 </div>
 
@@ -38,18 +37,16 @@
                         <div class="movie-info">
                             <h3>{{ movie.name }}</h3>
                             <div class="movie-meta">
-                                <span><i class="fas fa-clock"></i> {{ movie.time }} мин</span>
-                                <span><i class="fas fa-tag"></i> {{ movie.genre }}</span>
+                                <span>{{ movie.time }} мин</span>
+                                <span>{{ movie.genre }}</span>
                             </div>
                             <div class="movie-details">
-                                <p><i class="fas fa-user"></i> <strong>Режиссёр:</strong> {{ movie.director }}</p>
-                                <p v-if="movie.operator"><i class="fas fa-camera"></i> <strong>Оператор:</strong> {{ movie.operator }}</p>
-                                <p><i class="fas fa-ruble-sign"></i> <strong>Цена:</strong> {{ movie.price }} ₽</p>
+                                <p><strong>Режиссёр:</strong> {{ movie.director }}</p>
+                                <p v-if="movie.operator"><strong>Оператор:</strong> {{ movie.operator }}</p>
+                                <p><strong>Цена:</strong> {{ movie.price }} ₽</p>
                             </div>
                             <div class="movie-actions">
-                                <button class="btn-buy" @click="buyTicket(movie.id)">
-                                    <i class="fas fa-ticket-alt"></i> Купить билет
-                                </button>
+                                <button class="btn-buy" @click="buyTicket(movie.id)">Купить билет</button>
                                 <button v-if="isAdmin" class="btn-edit" @click="openEditMovieModal(movie)">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -92,9 +89,16 @@
                                 <input type="text" v-model="movieForm.operator">
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Актёры</label>
-                            <input type="text" v-model="movieForm.actors">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Актёры</label>
+                                <input type="text" v-model="movieForm.actors">
+
+                            </div>
+                            <div class="form-group">
+                                <label>Год выпуска</label>
+                                <input type="number" v-model="movieForm.year" required min="1900" :max="new Date().getFullYear()">
+                            </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
@@ -140,7 +144,7 @@ export default {
             isEditing: false,
             editingMovieId: null,
             movieForm: {
-                name: '', director: '', operator: '', actors: '',
+                name: '', year: '', director: '', operator: '', actors: '',
                 genre: '', studio: '', time: '', price: 0
             },
             modalLoading: false,
@@ -196,7 +200,7 @@ export default {
             this.isEditing = false;
             this.editingMovieId = null;
             this.movieForm = {
-                name: '', director: '', operator: '', actors: '',
+                name: '', year: '', director: '', operator: '', actors: '',
                 genre: '', studio: '', time: '', price: 0
             };
             this.showMovieModal = true;
@@ -206,6 +210,7 @@ export default {
             this.editingMovieId = movie.id;
             this.movieForm = {
                 name: movie.name || '',
+                year: movie.year || '',
                 director: movie.director || '',
                 operator: movie.operator || '',
                 actors: movie.actors || '',
@@ -292,29 +297,36 @@ export default {
 
 .filter-bar {
     margin-bottom: 2rem;
-}
-
-.filter-buttons {
     display: flex;
-    gap: 0.8rem;
-    flex-wrap: wrap;
     justify-content: center;
 }
 
-.filter-btn {
-    background: #202028;
-    border: none;
+.filter-select-wrapper {
+    max-width: 200px;
+    width: 100%;
+}
+
+.filter-select {
+    width: 100%;
     padding: 0.6rem 1.5rem;
+    background: #2c2c34;
+    border: 1px solid #3a3a42;
     border-radius: 40px;
-    font-weight: 500;
-    color: #dddddd;
+    color: white;
     cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
     transition: all 0.2s;
 }
 
-.filter-btn:hover, .filter-btn.active {
-    background: #f5c518;
-    color: #0f0f12;
+.filter-select:hover {
+    border-color: #f5c518;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #f5c518;
+    box-shadow: 0 0 0 2px rgba(245, 197, 24, 0.2);
 }
 
 .movies-grid {

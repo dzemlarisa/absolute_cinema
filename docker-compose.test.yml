@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    volumes:
+      - ./backend/app:/app/backend/app
+      - ./tests:/app/tests
+    environment:
+      DATABASE_URL: "sqlite:///:memory:"
+      TESTING: "true"
+      PYTHONPATH: "/app/backend"
+    command: python -m pytest tests/ -v --tb=short
