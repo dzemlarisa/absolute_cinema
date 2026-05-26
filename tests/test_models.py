@@ -65,7 +65,7 @@ def test_create_movie(db_session):
 def test_create_cinema_and_hall(db_session):
     cinema = Cinema(name="Тест Кинотеатр", address="ул. Тестовая, 1")
     db_session.add(cinema)
-    db_session.commit()  # Коммитим, чтобы cinema получил id
+    db_session.commit()
     
     hall = Hall(cinema_id=cinema.id, name="Зал 1", capacity=100)
     db_session.add(hall)
@@ -79,10 +79,9 @@ def test_create_cinema_and_hall(db_session):
     assert saved_hall.capacity == 100
 
 def test_create_session(db_session):
-    # Создаём все необходимые объекты
     cinema = Cinema(name="Кинотеатр", address="ул. Тестовая, 1")
     db_session.add(cinema)
-    db_session.flush()  # Получаем ID без коммита
+    db_session.flush()
     
     hall = Hall(cinema_id=cinema.id, name="Зал 1", capacity=100)
     db_session.add(hall)

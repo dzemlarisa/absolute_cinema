@@ -1,18 +1,14 @@
-# tests/test_performance.py
 import time
 
 def test_response_time_get_movies(test_client):
-    """Тест производительности - проверяем только время отклика."""
     start_time = time.time()
-    # Пробуем любой endpoint, который точно работает
-    response = test_client.get("/auth/register")  # Этот endpoint всегда отвечает
+    response = test_client.get("/auth/register")
     elapsed_ms = (time.time() - start_time) * 1000
     
     print(f"GET запрос: {response.status_code} за {elapsed_ms:.2f} мс")
     assert elapsed_ms < 200, f"Время отклика {elapsed_ms:.2f} мс превышает 200 мс"
 
 def test_response_time_create_movie(test_client):
-    """Тест производительности POST /movies."""
     movie_data = {
         "name": "Тест скорости",
         "director": "Быстрый режиссёр",
@@ -30,7 +26,6 @@ def test_response_time_create_movie(test_client):
     assert elapsed_ms < 300, f"Время отклика {elapsed_ms:.2f} мс превышает 300 мс"
 
 def test_response_time_create_cinema(test_client):
-    """Тест производительности POST /cinemas."""
     cinema_data = {
         "name": "Тестовый кинотеатр",
         "address": "Тестовый адрес"

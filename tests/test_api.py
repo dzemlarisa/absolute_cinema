@@ -6,13 +6,11 @@ from models import Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-# Тестовая БД
 TEST_DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(TEST_DATABASE_URL, echo=False)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def override_get_db():
-    """Переопределяем зависимость get_db для тестов"""
     try:
         db = TestingSessionLocal()
         yield db
@@ -23,7 +21,6 @@ app.dependency_overrides[get_db] = override_get_db
 
 @pytest.fixture
 def client():
-    """Создаёт тестовый клиент"""
     Base.metadata.create_all(bind=engine)
     with TestClient(app) as test_client:
         yield test_client
@@ -31,18 +28,14 @@ def client():
 
 @pytest.fixture
 def auth_headers():
-    """Заголовки с тестовым токеном (для демо-режима)"""
-    # В реальном проекте здесь должен быть получен реальный токен
     return {"Authorization": "Bearer demo"}
 
 def test_get_movies_empty(client, auth_headers):
-    """Тест: получение списка фильмов, когда БД пуста"""
     response = client.get("/movies", headers=auth_headers)
     assert response.status_code == 200
     assert response.json() == []
 
 def test_create_movie(client, auth_headers):
-    """Тест: создание нового фильма"""
     movie_data = {
         "name": "Тестовый фильм",
         "year": 2026,
@@ -62,8 +55,6 @@ def test_create_movie(client, auth_headers):
     assert "id" in data
 
 def test_get_movies_after_create(client, auth_headers):
-    """Тест: получение списка фильмов после добавления"""
-    # Сначала добавляем фильм
     movie_data = {
         "name": "Тестовый фильм",
         "year": 2026,
@@ -76,8 +67,7 @@ def test_get_movies_after_create(client, auth_headers):
         "price": 350
     }
     client.post("/movies", json=movie_data, headers=auth_headers)
-    
-    # Затем получаем список
+
     response = client.get("/movies", headers=auth_headers)
     assert response.status_code == 200
     movies = response.json()
@@ -85,8 +75,6 @@ def test_get_movies_after_create(client, auth_headers):
     assert movies[0]["name"] == "Фильм для теста"
 
 def test_get_movie_by_id(client, auth_headers):
-    """Тест: получение фильма по ID"""
-    # Создаём фильм
     movie_data = {
         "name": "Тестовый фильм",
         "year": 2026,
@@ -100,21 +88,17 @@ def test_get_movie_by_id(client, auth_headers):
     }
     create_response = client.post("/movies", json=movie_data, headers=auth_headers)
     movie_id = create_response.json()["id"]
-    
-    # Получаем фильм по ID
+
     response = client.get(f"/movies/{movie_id}", headers=auth_headers)
     assert response.status_code == 200
     assert response.json()["name"] == "Фильм по ID"
 
 def test_get_movie_not_found(client, auth_headers):
-    """Тест: получение несуществующего фильма"""
     response = client.get("/movies/99999", headers=auth_headers)
     assert response.status_code == 404
     assert "не найден" in response.json()["detail"]
 
 def test_update_movie(client, auth_headers):
-    """Тест: обновление фильма"""
-    # Создаём фильм
     movie_data = {
         "name": "Тестовый фильм",
         "year": 2026,
@@ -129,16 +113,13 @@ def test_update_movie(client, auth_headers):
 
     create_response = client.post("/movies", json=movie_data, headers=auth_headers)
     movie_id = create_response.json()["id"]
-    
-    # Обновляем название
+
     update_data = {"name": "Новое название"}
     response = client.put(f"/movies/{movie_id}", json=update_data, headers=auth_headers)
     assert response.status_code == 200
     assert response.json()["name"] == "Новое название"
 
 def test_delete_movie(client, auth_headers):
-    """Тест: удаление фильма"""
-    # Создаём фильм
     movie_data = {
         "name": "Тестовый фильм",
         "year": 2026,
@@ -152,23 +133,19 @@ def test_delete_movie(client, auth_headers):
     }
     create_response = client.post("/movies", json=movie_data, headers=auth_headers)
     movie_id = create_response.json()["id"]
-    
-    # Удаляем
+
     response = client.delete(f"/movies/{movie_id}", headers=auth_headers)
     assert response.status_code == 200
     assert "успешно удалён" in response.json()["message"]
-    
-    # Проверяем, что фильма больше нет
+
     get_response = client.get(f"/movies/{movie_id}", headers=auth_headers)
     assert get_response.status_code == 404
 
 def test_get_cinemas(client, auth_headers):
-    """Тест: получение списка кинотеатров"""
     response = client.get("/cinemas", headers=auth_headers)
     assert response.status_code == 200
 
 def test_create_cinema(client, auth_headers):
-    """Тест: создание кинотеатра"""
     cinema_data = {
         "name": "Тестовый Кинотеатр",
         "address": "ул. Тестовая, 10"
@@ -178,8 +155,6 @@ def test_create_cinema(client, auth_headers):
     assert response.json()["name"] == "Тестовый Кинотеатр"
 
 def test_get_genres(client, auth_headers):
-    """Тест: получение списка жанров"""
-    # Добавляем несколько фильмов с разными жанрами
     movies = [
         {"name": "Фантастика 1", "director": "Реж 1", "genre": "фантастика", "time": 90, "price": 300},
         {"name": "Драма 1", "director": "Реж 2", "genre": "драма", "time": 100, "price": 320},

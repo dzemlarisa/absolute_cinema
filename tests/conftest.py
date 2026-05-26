@@ -1,4 +1,3 @@
-# tests/conftest.py
 import os
 import sys
 
@@ -36,7 +35,6 @@ from main import app
 from database import get_db
 from fastapi.testclient import TestClient
 
-# ПРАВИЛЬНЫЙ override - возвращает генератор
 def override_get_db():
     db = TestingSessionLocal()
     try:
