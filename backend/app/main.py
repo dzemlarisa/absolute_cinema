@@ -403,7 +403,6 @@ async def get_movies(
 
 @app.get("/movies/genres")
 async def get_genres(
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Возвращает список жанров"""

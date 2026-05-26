@@ -155,6 +155,10 @@ export default {
         }
     },
     methods: {
+        parseMoscowDate(dateString) {
+            const moscowDateString = dateString.replace(' ', 'T') + '+03:00';
+            return new Date(moscowDateString);
+        },
         async loadMovies() {
             try {
                 this.movies = await cinemaApi.getMovies()
@@ -181,17 +185,31 @@ export default {
             this.step = 3
         },
         async loadSessions() {
-            this.loadingSessions = true
+            this.loadingSessions = true;
             try {
-                this.sessions = await cinemaApi.getSessions({
+                const allSessions = await cinemaApi.getSessions({
                     movie_id: this.selectedMovie.id,
                     cinema_id: this.selectedCinema.id
-                })
+                });
+
+                const now = new Date();
+
+                this.sessions = allSessions.filter(session => {
+                    const sessionTime = this.parseMoscowDate(session.start_time);
+                    return sessionTime > now;
+                });
+
+                this.sessions.sort((a, b) => {
+                    const timeA = this.parseMoscowDate(a.start_time);
+                    const timeB = this.parseMoscowDate(b.start_time);
+                    return timeA - timeB;
+                });
+
             } catch (error) {
-                console.error('Ошибка загрузки сеансов:', error)
-                this.sessions = []
+                console.error('Ошибка загрузки сеансов:', error);
+                this.sessions = [];
             }
-            this.loadingSessions = false
+            this.loadingSessions = false;
         },
         selectSession(session) {
             this.selectedSession = session
