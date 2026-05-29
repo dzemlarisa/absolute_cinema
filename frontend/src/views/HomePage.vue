@@ -255,4 +255,57 @@ export default {
     line-height: 1.5;
 }
 
+@media (max-width: 640px) {
+    .container {
+        padding: 0 16px;
+    }
+    
+    .hero {
+        padding: 2.5rem 0;
+    }
+    
+    .hero h1 {
+        font-size: 1.75rem;
+    }
+    
+    .hero p {
+        font-size: 0.9rem;
+    }
+    
+    .movies-preview h2,
+    .about-content h2 {
+        font-size: 1.5rem;
+    }
+    
+    .movies-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .movie-card {
+        max-width: 100%;
+    }
+    
+    .movie-info h3 {
+        font-size: 1.1rem;
+        white-space: normal;
+        word-break: break-word;
+    }
+    
+    .movie-meta {
+        font-size: 0.7rem;
+        gap: 0.6rem;
+    }
+    
+    .btn-buy {
+        padding: 0.7rem;
+        font-size: 0.9rem;
+    }
+    
+    .loading, .no-results {
+        padding: 2rem;
+        font-size: 0.9rem;
+    }
+}
+
 </style>
