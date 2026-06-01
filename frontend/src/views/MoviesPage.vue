@@ -34,6 +34,9 @@
 
                 <div v-else class="movies-grid">
                     <div v-for="movie in filteredMovies" :key="movie.id" class="movie-card">
+                        <div class="movie-poster">
+                            <img :src="movie.poster" :alt="movie.name" @error="handleImageError(movie)">
+                        </div>
                         <div class="movie-info">
                             <h3>{{ movie.name }}</h3>
                             <div class="movie-meta">
@@ -110,9 +113,15 @@
                                 <input type="text" v-model="movieForm.time" placeholder="В минутах">
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Цена (₽)</label>
-                            <input type="number" v-model="movieForm.price" required min="0">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Цена (₽)</label>
+                                <input type="number" v-model="movieForm.price" required min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>URL постера</label>
+                                <input type="url" v-model="movieForm.poster_url" placeholder="https://example.com/poster.jpg">
+                            </div>
                         </div>
                         <div v-if="modalError" class="error-message">{{ modalError }}</div>
                         <div class="modal-actions">
@@ -145,7 +154,7 @@ export default {
             editingMovieId: null,
             movieForm: {
                 name: '', year: '', director: '', operator: '', actors: '',
-                genre: '', studio: '', time: '', price: 0
+                genre: '', studio: '', time: '', price: 0, poster_url: ''
             },
             modalLoading: false,
             modalError: ''
@@ -196,12 +205,15 @@ export default {
         buyTicket(movieId) {
             this.$router.push({ name: 'ticket', query: { movieId } })
         },
+        handleImageError(movie) {
+            movie.poster = 'https://via.placeholder.com/300x450?text=Нет+постера'
+        },
         openCreateMovieModal() {
             this.isEditing = false;
             this.editingMovieId = null;
             this.movieForm = {
                 name: '', year: '', director: '', operator: '', actors: '',
-                genre: '', studio: '', time: '', price: 0
+                genre: '', studio: '', time: '', price: 0, poster_url: ''
             };
             this.showMovieModal = true;
         },
@@ -217,7 +229,8 @@ export default {
                 genre: movie.genre || '',
                 studio: movie.studio || '',
                 time: movie.time || '',
-                price: movie.price || 0
+                price: movie.price || 0,
+                poster_url: movie.poster_url || ''
             };
             this.showMovieModal = true;
         },
@@ -338,8 +351,34 @@ export default {
 .movie-card {
     background: #18181e;
     border-radius: 24px;
+    overflow: hidden;
     transition: transform 0.25s ease;
     border: 1px solid #2c2c30;
+    display: flex;
+    flex-direction: column;
+}
+
+.movie-poster {
+    height: 320px;
+    overflow: hidden;
+}
+
+.movie-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.movie-card:hover .movie-poster img {
+    transform: scale(1.05);
+}
+
+.movie-info {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .movie-card:hover {

@@ -15,6 +15,7 @@
                         <div v-for="movie in movies" :key="movie.id" 
                              :class="['movie-option', { selected: selectedMovie?.id === movie.id }]"
                              @click="selectMovie(movie)">
+                            <img :src="movie.poster" :alt="movie.name" class="movie-option-poster" @error="handleImageError(movie)">
                             <div class="movie-option-info">
                                 <h3>{{ movie.name }}</h3>
                                 <p>{{ movie.genre }} • {{ movie.time }}</p>
@@ -238,6 +239,9 @@ export default {
                 this.paying = false
             }
         },
+        handleImageError(movie) {
+            movie.poster = 'https://via.placeholder.com/80x120?text=Нет+постера'
+        },
         resetBooking() {
             this.step = 1
             this.selectedMovie = null
@@ -325,6 +329,13 @@ export default {
 }
 
 .movie-option img {
+    width: 60px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.movie-option-poster {
     width: 60px;
     height: 90px;
     object-fit: cover;

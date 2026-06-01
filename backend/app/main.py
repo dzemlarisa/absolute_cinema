@@ -12,15 +12,9 @@ from jwt.exceptions import PyJWTError
 import pytz
 import os
 
-# УДАЛИТЕ ЭТИ ДВЕ СТРОКИ:
-# from database import get_db, engine, DATABASE_URL, SessionLocal
-# from models import create_tables, Base, Role, User, Movie, Cinema, Hall, Session as SessionModel, Ticket
-
-# Импортируем только функции, не объекты engine/SessionLocal
 from database import get_db
 from models import Base, Role, User, Movie, Cinema, Hall, Session as SessionModel, Ticket
 
-# Получаем engine и SessionLocal динамически
 def get_engine():
     from database import engine
     return engine
@@ -67,6 +61,7 @@ class MovieBase(BaseModel):
     studio: Optional[str] = None
     time: int
     price: float
+    poster_url: Optional[str] = None 
 
 class MovieCreate(MovieBase):
     pass
@@ -81,6 +76,7 @@ class MovieUpdate(BaseModel):
     studio: Optional[str] = None
     time: Optional[int] = None
     price: Optional[float] = None
+    poster_url: Optional[str] = None 
 
 class MovieResponse(MovieBase):
     id: int

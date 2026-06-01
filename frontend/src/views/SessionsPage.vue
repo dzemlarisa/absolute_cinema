@@ -39,14 +39,12 @@
                         <div class="session-info">
                             <h3>{{ getMovieName(session.movie_id) }}</h3>
                             <div class="session-details">
-                                <span><i class="fas fa-building"></i> {{ getCinemaName(session.cinema_id) }}</span>
-                                <span><i class="fas fa-door-open"></i> Зал: {{ getHallName(session.hall_id) }}</span>
-                                <span><i class="fas fa-clock"></i> {{ formatTime(session.start_time) }}</span>
-                                <span><i class="fas fa-chair"></i> Свободно: {{ session.remaining_seats }}</span>
+                                <span>Кинотеатр: {{ getCinemaName(session.cinema_id) }}</span>
+                                <span>Зал: {{ getHallName(session.hall_id) }}</span>
+                                <span>Время: {{ formatTime(session.start_time) }}</span>
+                                <span>Свободно: {{ session.remaining_seats }}</span>
                             </div>
-                            <button v-if="isAdmin" class="btn-delete" @click="deleteSession(session.id)">
-                                <i class="fas fa-trash"></i> Удалить сеанс
-                            </button>
+                            <button v-if="isAdmin" class="btn-delete" @click="deleteSession(session.id)">Удалить</button>
                         </div>
                     </div>
                 </div>

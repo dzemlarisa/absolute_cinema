@@ -43,6 +43,7 @@ class Movie(Base):
     studio = Column(String(100), nullable=True)
     time = Column(String(10), nullable=False)
     price = Column(Integer, nullable=False)
+    poster_url = Column(String(500), nullable=True)
     
     sessions = relationship('Session', back_populates='movie', cascade='all, delete-orphan')
     
@@ -124,5 +125,4 @@ def create_tables(engine):
     """
     #Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
-    print("Все таблицы успешно созданы (или уже существуют)")
 

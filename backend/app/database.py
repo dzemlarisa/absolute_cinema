@@ -4,10 +4,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Используем переменную окружения, с fallback на PostgreSQL
 DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://cinema_user:12345@db:5432/cinema')
 
-# Создаём engine с проверкой на SQLite
 connect_args = {"check_same_thread": False} if 'sqlite' in DATABASE_URL else {}
 engine = create_engine(DATABASE_URL, echo=True, connect_args=connect_args)
 

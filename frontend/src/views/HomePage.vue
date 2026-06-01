@@ -18,6 +18,9 @@
                 </div>
                 <div v-else class="movies-grid">
                     <div v-for="movie in newMovies" :key="movie.id" class="movie-card">
+                        <div class="movie-poster">
+                            <img :src="movie.poster" :alt="movie.name" @error="handleImageError(movie)">
+                        </div>
                         <div class="movie-info">
                             <h3>{{ movie.name }}</h3>
                             <div class="movie-meta">
@@ -90,6 +93,9 @@ export default {
         },
         buyTicket(movieId) {
             this.$router.push({ name: 'ticket', query: { movieId } })
+        },
+        handleImageError(movie) {
+            movie.poster = 'https://via.placeholder.com/300x450?text=Нет+постера'
         }
     }
 }
@@ -139,18 +145,29 @@ export default {
     background: #18181e;
     border-radius: 24px;
     overflow: hidden;
-    transition: transform 0.25s ease, box-shadow 0.25s;
+    transition: transform 0.25s ease;
     border: 1px solid #2c2c30;
+}
+
+.movie-poster {
+    height: 340px;
+    overflow: hidden;
+}
+
+.movie-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.movie-info {
+    padding: 1.2rem;
 }
 
 .movie-card:hover {
     transform: translateY(-5px);
     border-color: #f5c518;
     box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.5);
-}
-
-.movie-info {
-    padding: 1.2rem;
 }
 
 .movie-info h3 {

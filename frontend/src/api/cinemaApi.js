@@ -90,7 +90,7 @@ export const cinemaApi = {
         }
     },
 
-    // ========== ФИЛЬМЫ ==========
+    // ФИЛЬМЫ
     async getMovies(params = {}) {
         const queryParams = new URLSearchParams(params).toString()
         const url = `${API_BASE_URL}/movies${queryParams ? '?' + queryParams : ''}`
@@ -98,7 +98,12 @@ export const cinemaApi = {
             headers: this.getAuthHeaders()
         })
         if (!response.ok) throw new Error('Ошибка загрузки фильмов')
-        return response.json()
+        const movies = await response.json()
+
+        return movies.map(movie => ({
+            ...movie,
+            poster: movie.poster_url || 'https://via.placeholder.com/300x450?text=Нет+постера'
+        }))
     },
 
     async getMovie(id) {
@@ -106,7 +111,12 @@ export const cinemaApi = {
             headers: this.getAuthHeaders()
         })
         if (!response.ok) throw new Error('Ошибка загрузки фильма')
-        return response.json()
+        const movie = await response.json()
+        
+        return {
+            ...movie,
+            poster: movie.poster_url || 'https://via.placeholder.com/300x450?text=Нет+постера'
+        }
     },
 
     async getGenres() {
@@ -117,7 +127,6 @@ export const cinemaApi = {
         return response.json()
     },
 
-    // СОЗДАНИЕ ФИЛЬМА (для админа)
     async createMovie(movieData) {
         const response = await fetch(`${API_BASE_URL}/movies`, {
             method: 'POST',
@@ -131,7 +140,6 @@ export const cinemaApi = {
         return response.json()
     },
 
-    // ОБНОВЛЕНИЕ ФИЛЬМА (для админа)
     async updateMovie(id, movieData) {
         const response = await fetch(`${API_BASE_URL}/movies/${id}`, {
             method: 'PUT',
@@ -145,7 +153,6 @@ export const cinemaApi = {
         return response.json()
     },
 
-    // УДАЛЕНИЕ ФИЛЬМА (для админа)
     async deleteMovie(id) {
         const response = await fetch(`${API_BASE_URL}/movies/${id}`, {
             method: 'DELETE',
@@ -155,7 +162,6 @@ export const cinemaApi = {
         return response.json()
     },
 
-    // ========== КИНОТЕАТРЫ ==========
     async getCinemas() {
         const response = await fetch(`${API_BASE_URL}/cinemas`, {
             headers: this.getAuthHeaders()
@@ -180,7 +186,6 @@ export const cinemaApi = {
         return response.json()
     },
 
-    // СОЗДАНИЕ КИНОТЕАТРА (для админа)
     async createCinema(cinemaData) {
         const response = await fetch(`${API_BASE_URL}/cinemas`, {
             method: 'POST',
@@ -194,7 +199,6 @@ export const cinemaApi = {
         return response.json()
     },
 
-    // ОБНОВЛЕНИЕ КИНОТЕАТРА (для админа)
     async updateCinema(id, cinemaData) {
         const response = await fetch(`${API_BASE_URL}/cinemas/${id}`, {
             method: 'PUT',
@@ -217,8 +221,7 @@ export const cinemaApi = {
         return response.json()
     },
 
-    // ========== ЗАЛЫ ==========
-    // СОЗДАНИЕ ЗАЛА (для админа)
+    // ЗАЛЫ
     async createHall(cinemaId, hallData) {
         const response = await fetch(`${API_BASE_URL}/cinemas/${cinemaId}/halls`, {
             method: 'POST',
@@ -254,7 +257,7 @@ export const cinemaApi = {
         return response.json()
     },
 
-    // ========== СЕАНСЫ ==========
+    // СЕАНСЫ 
     async getSessions(params = {}) {
         const queryParams = new URLSearchParams(params).toString()
         const url = `${API_BASE_URL}/sessions${queryParams ? '?' + queryParams : ''}`
@@ -303,7 +306,7 @@ export const cinemaApi = {
         return response.json()
     },
 
-    // ========== БИЛЕТЫ ==========
+    // БИЛЕТЫ 
     async createTicket(ticketData) {
         const response = await fetch(`${API_BASE_URL}/tickets`, {
             method: 'POST',
